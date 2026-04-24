@@ -187,10 +187,7 @@ app.use(cors({
   }
 }));
 app.use(express.json());
-
-app.get("/", (_req, res) => {
-  res.send("Servidor de Google Calendar listo.");
-});
+app.use(express.static(path.join(__dirname)));
 
 app.get("/auth/google", (_req, res) => {
   const url = oauth2Client.generateAuthUrl({
@@ -439,6 +436,8 @@ app.post("/api/calendar/book", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Servidor listo en http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto " + PORT);
 });
