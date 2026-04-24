@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagar curso | Excelizate Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo-excelizatepro.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="purchase-page">
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-box">
+      <img src="logo-excelizatepro.png" alt="Logo de Excelizate Pro">
+      <p>Cargando Excelizate Pro...</p>
+    </div>
+  </div>
+
+  <div class="purchase-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html#cursos" aria-label="Excelizate Pro">
+        <img class="brand-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+      </a>
+      <nav class="nav-pill" aria-label="Principal">
+        <a class="nav-item active" href="index.html#cursos">Cursos</a>
+        <a class="nav-item" href="index.html#profesores">Profesores</a>
+        <a class="nav-item" href="index.html#contacto">Contacto</a>
+      </nav>
+      <div class="nav-tools">
+        <a class="secondary-action" href="index.html#cursos">Volver</a>
+      </div>
+    </header>
+
+    <main class="purchase-layout">
+      <section class="purchase-summary">
+        <span class="section-tag">Resumen</span>
+        <h1 id="paymentTitle">Tu compra esta lista</h1>
+        <p id="paymentDescription">Revisa los datos y continua al pago.</p>
+        <ul class="summary-points" id="paymentSummary"></ul>
+      </section>
+
+      <section class="purchase-panel">
+        <h2>Pagar por Nequi</h2>
+        <p class="field-help">Haz el pago al numero 3028677915 o escanea el QR. Despues de pagar, sube tu comprobante para validar tu acceso o tu reserva.</p>
+        <p class="payment-note purchase-notice">Tu acceso al curso o la confirmacion de la clase se habilita despues de verificar el comprobante. Tiempo estimado de respuesta: entre 2 y 12 horas.</p>
+
+        <div class="payment-link-box nequi-box">
+          <div class="nequi-number-card">
+            <span class="section-tag">Numero Nequi</span>
+            <h3>3028677915</h3>
+            <p class="payment-note">Titular: Juan Rubiano</p>
+          </div>
+          <div class="nequi-qr-card">
+            <img class="nequi-qr" src="nequi-qr.png" alt="QR de Nequi de Juan Rubiano">
+          </div>
+        </div>
+
+        <form class="purchase-form" id="receiptForm">
+          <div class="field">
+            <label for="receiptFile">Despues de pagar, sube tu comprobante</label>
+            <input id="receiptFile" name="receiptFile" type="file" accept="image/*,.pdf" required>
+          </div>
+          <div class="form-actions">
+            <button class="primary-action" type="submit">Enviar comprobante</button>
+            <a class="secondary-action" id="notifyJuanButton" href="#" target="_blank" rel="noopener noreferrer">Contactar a Juan por WhatsApp</a>
+          </div>
+          <p class="payment-note" id="receiptStatus">Tu comprobante quedara registrado para que podamos validar el pago y comunicarnos contigo.</p>
+        </form>
+
+        <div class="payment-box">
+          <h2>Informacion del servicio</h2>
+          <p class="payment-note">Estos cursos estan orientados a mejora practica, refuerzo laboral y aplicacion inmediata. No corresponden a una certificacion academica formal.</p>
+        </div>
+
+        <div class="payment-box">
+          <h2>Google Calendar</h2>
+          <p class="payment-note" id="calendarNote">Para cursos normales no hace falta calendario. Para clase personalizada puedo dejar dos opciones: abrir Google Calendar con la reserva prellenada o conectarlo de forma automatica cuando me compartas una integracion valida.</p>
+          <div class="form-actions hidden" id="calendarActions">
+            <a class="primary-action" id="calendarButton" href="#" target="_blank" rel="noopener noreferrer">Abrir reserva en Google Calendar</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="pago.js"></script>
+</body>
+</html>

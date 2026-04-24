@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1777041888753,
+    "createdAt": "2026-04-24T14:44:48.753Z",
+    "customerName": "juan",
+    "customerPhone": "3028677915",
+    "customerEmail": "rubianojuan2213@gmail.com",
+    "courseTitle": "Excel basico (desde cero)",
+    "teacherName": "Juan David Rubiano",
+    "receiptFilename": "1777041888736-WhatsApp-Image-2026-04-23-at-17.23.51.jpeg",
+    "receiptPath": "C:\\Users\\Contabilidadisd\\Documents\\Codex\\2026-04-23-tengo-un-proyecto-llamado-excelizate-que\\uploads\\1777041888736-WhatsApp-Image-2026-04-23-at-17.23.51.jpeg"
+  },
+  {
+    "id": 1777042052856,
+    "createdAt": "2026-04-24T14:47:32.856Z",
+    "customerName": "juan",
+    "customerPhone": "3028677915",
+    "customerEmail": "rubianojuan2213@gmail.com",
+    "courseTitle": "Clase personalizada",
+    "teacherName": "Juan David Rubiano",
+    "receiptFilename": "1777042052840-WhatsApp-Image-2026-04-23-at-17.23.51.jpeg",
+    "receiptPath": "C:\\Users\\Contabilidadisd\\Documents\\Codex\\2026-04-23-tengo-un-proyecto-llamado-excelizate-que\\uploads\\1777042052840-WhatsApp-Image-2026-04-23-at-17.23.51.jpeg"
+  }
+]

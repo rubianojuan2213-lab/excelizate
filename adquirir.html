@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adquirir curso | Excelizate Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo-excelizatepro.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="purchase-page">
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-box">
+      <img src="logo-excelizatepro.png" alt="Logo de Excelizate Pro">
+      <p>Cargando Excelizate Pro...</p>
+    </div>
+  </div>
+
+  <div class="purchase-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html#cursos" aria-label="Excelizate Pro">
+        <img class="brand-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+      </a>
+
+      <nav class="nav-pill" aria-label="Principal">
+        <a class="nav-item active" href="index.html#cursos">Cursos</a>
+        <a class="nav-item" href="index.html#metodo">Metodo</a>
+        <a class="nav-item" href="index.html#contacto">Contacto</a>
+      </nav>
+
+      <div class="nav-tools">
+        <a class="secondary-action" href="index.html#cursos">Volver</a>
+      </div>
+    </header>
+
+    <main class="purchase-layout">
+      <section class="purchase-summary">
+        <div class="purchase-poster" id="purchasePoster" aria-hidden="true"></div>
+        <span class="section-tag" id="purchaseType">Curso</span>
+        <h1 id="purchaseTitle">Selecciona un curso</h1>
+        <div class="purchase-price" id="purchasePrice">$0 COP</div>
+        <p id="purchaseDescription">Completa tus datos para continuar con la entrega del curso o con la reserva de la clase personalizada.</p>
+        <ul class="summary-points" id="summaryPoints"></ul>
+      </section>
+
+      <section class="purchase-panel">
+        <h2>Completa tus datos</h2>
+        <p class="field-help" id="formIntro">Enviaremos la informacion segun la opcion que elijas.</p>
+        <p class="payment-note purchase-notice">El acceso al curso o la confirmacion de la clase se realiza despues de validar el pago y el comprobante. Tiempo estimado: entre 2 y 12 horas.</p>
+
+        <form class="purchase-form" id="purchaseForm">
+          <div class="field-row">
+            <div class="field">
+              <label for="fullName">Nombre completo</label>
+              <input id="fullName" name="fullName" type="text" placeholder="Tu nombre completo" required>
+            </div>
+            <div class="field">
+              <label for="phone">Numero de celular</label>
+              <input id="phone" name="phone" type="tel" placeholder="3001234567" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Correo electronico</label>
+            <input id="email" name="email" type="email" placeholder="tunombre@correo.com" required>
+          </div>
+
+          <div class="field">
+            <legend>Elige tu profesor</legend>
+            <fieldset class="teacher-picker">
+              <label class="teacher-option">
+                <input type="radio" name="teacher" value="Juan David Rubiano|3028677915|Analista contable" checked>
+                <span>
+                  <strong>Juan David Rubiano</strong>
+                  <small>Analista contable</small>
+                </span>
+              </label>
+              <label class="teacher-option">
+                <input type="radio" name="teacher" value="Daniela Daza|3028621101|Administradora operativa de punto">
+                <span>
+                  <strong>Daniela Daza</strong>
+                  <small>Administradora operativa de punto</small>
+                </span>
+              </label>
+              <label class="teacher-option">
+                <input type="radio" name="teacher" value="Alejandra Amaya|3143520258|Auxiliar de contabilidad">
+                <span>
+                  <strong>Alejandra Amaya</strong>
+                  <small>Auxiliar de contabilidad</small>
+                </span>
+              </label>
+            </fieldset>
+          </div>
+
+          <div class="field" id="deliveryField">
+            <legend>Donde deseas recibir el curso</legend>
+            <fieldset class="delivery-options">
+              <label class="delivery-option">
+                <input type="radio" name="deliveryMethod" value="WhatsApp" checked>
+                <span>WhatsApp</span>
+              </label>
+              <label class="delivery-option">
+                <input type="radio" name="deliveryMethod" value="Correo">
+                <span>Correo</span>
+              </label>
+            </fieldset>
+          </div>
+
+          <div class="field-row hidden" id="scheduleFields">
+            <div class="field">
+              <label for="classDate">Elige el dia</label>
+              <input id="classDate" name="classDate" type="date">
+            </div>
+            <div class="field">
+              <label for="classTime">Elige la hora</label>
+              <input id="classTime" name="classTime" type="time">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Mensaje o detalle adicional</label>
+            <textarea id="notes" name="notes" placeholder="Escribe aqui alguna duda, objetivo o tema que quieras aprender."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="primary-action" type="submit" id="submitButton">Continuar</button>
+            <a class="secondary-action" href="https://wa.me/573028677915" target="_blank" rel="noopener noreferrer">Hablar por WhatsApp</a>
+          </div>
+        </form>
+
+        <div class="payment-box">
+          <h2>Informacion de compra</h2>
+          <p class="payment-note">Esta oferta corresponde a formacion practica y mejora laboral. No incluye certificacion oficial. Antes de pagar, revisa el precio, el curso y el profesor seleccionado.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>
