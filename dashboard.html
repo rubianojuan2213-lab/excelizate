@@ -58,6 +58,14 @@
       <div class="dashboard-grid" id="dashboardTotals"></div>
 
       <section class="dashboard-panels">
+        <article class="dashboard-panel dashboard-panel--featured">
+          <header class="dashboard-panel__header">
+            <h2>Curso más elegido</h2>
+            <p>El que genera más clics y actividad.</p>
+          </header>
+          <div id="dashboardTopCourse" class="dashboard-top-course"></div>
+        </article>
+
         <article class="dashboard-panel">
           <header class="dashboard-panel__header">
             <h2>Embudo general</h2>
@@ -86,6 +94,14 @@
 
         <article class="dashboard-panel">
           <header class="dashboard-panel__header">
+            <h2>Deserciones (embudo)</h2>
+            <p>Donde se pierden mas clientes en el proceso.</p>
+          </header>
+          <div id="dashboardDropoffs" class="dashboard-bars"></div>
+        </article>
+
+        <article class="dashboard-panel">
+          <header class="dashboard-panel__header">
             <h2>Top paginas</h2>
             <p>Origen/pagina mas frecuente en eventos.</p>
           </header>
@@ -104,7 +120,8 @@
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="auth.js?v=2026-05-05-03"></script>
-  <script src="dashboard.js?v=2026-05-05-03"></script>
+  <script src="analytics.js"></script>
+  <script src="auth.js?v=2026-05-05-04"></script>
+  <script src="dashboard.js?v=2026-05-05-04"></script>
 </body>
 </html>

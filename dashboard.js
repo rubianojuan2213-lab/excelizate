@@ -4,10 +4,12 @@ const dashboardPages = document.getElementById("dashboardPages");
 const dashboardCourses = document.getElementById("dashboardCourses");
 const dashboardFunnel = document.getElementById("dashboardFunnel");
 const dashboardTrend = document.getElementById("dashboardTrend");
+const dashboardTopCourse = document.getElementById("dashboardTopCourse");
+const dashboardDropoffs = document.getElementById("dashboardDropoffs");
 const authStatus = document.getElementById("authStatus");
 const dashboardStatus = document.getElementById("dashboardStatus");
 
-const DASHBOARD_JS_BUILD = "2026-05-05-03";
+const DASHBOARD_JS_BUILD = "2026-05-05-04";
 
 if (dashboardStatus) {
   dashboardStatus.textContent = `Dashboard JS: ${DASHBOARD_JS_BUILD}`;
@@ -114,6 +116,76 @@ function renderTrend(container, byDay) {
   `;
 }
 
+function renderTopCourse(container, perCourse) {
+  if (!container) return;
+  const entries = Object.entries(perCourse || {}).sort((a, b) => (b[1].clicks || 0) - (a[1].clicks || 0));
+  
+  if (!entries.length) {
+    container.innerHTML = `<p class="payment-note">Sin datos de cursos aun.</p>`;
+    return;
+  }
+
+  const [courseKey, courseData] = entries[0];
+  const conversionRate = courseData.started ? (courseData.completed / courseData.started * 100) : 0;
+  
+  container.innerHTML = `
+    <div class="top-course-card">
+      <div class="top-course-header">
+        <h3 style="font-size: 1.4em; margin: 0; text-transform: capitalize;">${escapeHtml(courseKey)}</h3>
+        <span class="pill" style="background: var(--accent, #007bff); color: white; padding: 0.5em 1em; border-radius: 20px; font-size: 0.9em;">TOP</span>
+      </div>
+      <div class="top-course-stats" style="margin-top: 1.5em; display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+        <div class="stat-item">
+          <span class="stat-label">Clics</span>
+          <strong class="stat-value" style="font-size: 1.8em;">${courseData.clicks || 0}</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Inicios de compra</span>
+          <strong class="stat-value" style="font-size: 1.8em;">${courseData.started || 0}</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Finalizadas</span>
+          <strong class="stat-value" style="font-size: 1.8em; color: green;">${courseData.completed || 0}</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Conversion</span>
+          <strong class="stat-value" style="font-size: 1.8em; color: green;">${Math.round(conversionRate)}%</strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDropoffs(container, funnel, perCourse) {
+  if (!container) return;
+  const steps = funnel?.steps || [];
+  
+  if (!steps.length) {
+    container.innerHTML = `<p class="payment-note">Sin datos de embudo.</p>`;
+    return;
+  }
+
+  const dropoffData = [];
+  steps.forEach((step, index) => {
+    const prev = index === 0 ? step.value : steps[index - 1].value;
+    const drop = Math.max((prev || 0) - (step.value || 0), 0);
+    if (drop > 0) {
+      dropoffData.push([`${step.label} → ${steps[index + 1]?.label || 'salida'}`, drop]);
+    }
+  });
+
+  // También agregamos deserciones por curso (started vs completed)
+  Object.entries(perCourse || {}).forEach(([courseKey, courseData]) => {
+    const courseDropOff = Math.max((courseData.started || 0) - (courseData.completed || 0), 0);
+    if (courseDropOff > 0) {
+      dropoffData.push([`${courseKey} (completa compra)`, courseDropOff]);
+    }
+  });
+
+  renderBars(container, dropoffData.sort((a, b) => b[1] - a[1]), { limit: 10 });
+}
+
+
 async function loadDashboard() {
   try {
     if (dashboardStatus) dashboardStatus.textContent = "Cargando metricas...";
@@ -141,6 +213,14 @@ async function loadDashboard() {
         <article class="dashboard-card dashboard-card--accent"><h3>Conversion</h3><strong>0%</strong><span class="kpi-note">Finalizadas / Formulario</span></article>
         <article class="dashboard-card"><h3>Conv. desde pago</h3><strong>0%</strong><span class="kpi-note">Finalizadas / Vista pago</span></article>
       `;
+    }
+
+    if (dashboardTopCourse) {
+      dashboardTopCourse.innerHTML = `<p class="payment-note">Cargando...</p>`;
+    }
+
+    if (dashboardDropoffs) {
+      dashboardDropoffs.innerHTML = `<p class="payment-note">Cargando...</p>`;
     }
 
     const response = await fetch("/api/admin/dashboard", {
@@ -177,6 +257,8 @@ async function loadDashboard() {
     renderBars(dashboardPages, pageEntries, { limit: 12 });
     renderFunnel(dashboardFunnel, data.funnel);
     renderTrend(dashboardTrend, data.byDay);
+    renderTopCourse(dashboardTopCourse, data.perCourse);
+    renderDropoffs(dashboardDropoffs, data.funnel, data.perCourse);
     if (dashboardStatus) dashboardStatus.textContent = "Metricas actualizadas.";
 
     if (!courseEntries.length) {

@@ -32,6 +32,8 @@ const {
   FRONTEND_URL,
   ADMIN_EMAILS = "rubianojuan2213@gmail.com",
   GOOGLE_REVIEW_URL = "",
+  GA_MEASUREMENT_ID = "",
+  LOOKER_DASHBOARD_URL = "",
   SMTP_HOST,
   SMTP_PORT,
   SMTP_SECURE,
@@ -403,7 +405,9 @@ app.get("/api/config", (_req, res) => {
   res.json({
     googleClientId: GOOGLE_ENABLED ? GOOGLE_CLIENT_ID : null,
     adminEmails,
-    googleReviewUrl: GOOGLE_REVIEW_URL
+    googleReviewUrl: GOOGLE_REVIEW_URL,
+    gaMeasurementId: GA_MEASUREMENT_ID || null,
+    lookerDashboardUrl: LOOKER_DASHBOARD_URL || null
   });
 });
 

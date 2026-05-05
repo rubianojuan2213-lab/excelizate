@@ -90,6 +90,10 @@ fetch("/api/metrics/track", {
   })
 }).catch(() => {});
 
+if (typeof window.trackAnalyticsEvent === "function") {
+  window.trackAnalyticsEvent("acquire_view", { courseKey: selectedCourse, source: "adquirir" });
+}
+
 if (classDate) {
   classDate.min = new Date().toISOString().split("T")[0];
 }
@@ -184,5 +188,12 @@ purchaseForm?.addEventListener("submit", async (event) => {
   }
 
   sessionStorage.setItem("excelizateOrder", JSON.stringify(order));
+  if (typeof window.trackAnalyticsEvent === "function") {
+    window.trackAnalyticsEvent("checkout_submit", {
+      courseKey: selectedCourse,
+      courseTitle: course.title,
+      personalized: course.personalized ? "1" : "0"
+    });
+  }
   window.location.href = `pago.html?curso=${selectedCourse}`;
 });

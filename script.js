@@ -64,6 +64,10 @@ function trackMetric(eventType, payload = {}) {
     },
     body: JSON.stringify({ eventType, ...payload })
   }).catch(() => {});
+
+  if (typeof window.trackAnalyticsEvent === "function") {
+    window.trackAnalyticsEvent(eventType, payload);
+  }
 }
 
 function normalizeButtonKey(element) {

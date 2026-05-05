@@ -25,6 +25,10 @@ fetch("/api/metrics/track", {
   })
 }).catch(() => {});
 
+if (typeof window.trackAnalyticsEvent === "function") {
+  window.trackAnalyticsEvent("payment_view", { courseKey: order.courseKey || "general", source: "pago" });
+}
+
 paymentTitle.textContent = order.courseType === "Clase personalizada"
   ? "Tu reserva esta lista para pago"
   : "Tu curso esta listo para pago";
@@ -106,6 +110,13 @@ receiptForm?.addEventListener("submit", async (event) => {
     if (!response.ok) {
       receiptStatus.textContent = data.error || "No se pudo guardar el comprobante.";
       return;
+    }
+
+    if (typeof window.trackAnalyticsEvent === "function") {
+      window.trackAnalyticsEvent("purchase_complete", {
+        courseKey: order.courseKey || "general",
+        source: "receipt_upload"
+      });
     }
 
     receiptStatus.textContent = "Comprobante recibido correctamente. Nos comunicaremos contigo para validar el acceso.";

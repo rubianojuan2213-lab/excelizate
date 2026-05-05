@@ -798,3 +798,58 @@
   }
 
 }
+
+/* Dashboard: Curso más elegido destacado */
+.dashboard-panel--featured {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(33, 150, 243, 0.08) 100%);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.12);
+}
+
+.dashboard-panel--featured .dashboard-panel__header {
+  background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.top-course-card {
+  padding: 20px;
+}
+
+.top-course-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  justify-content: space-between;
+}
+
+.top-course-header h3 {
+  flex: 1;
+}
+
+.top-course-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5em;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.stat-label {
+  font-size: 0.85em;
+  opacity: 0.7;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  display: block;
+}
