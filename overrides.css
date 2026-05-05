@@ -23,6 +23,10 @@
   align-items: center;
   padding: 12px 16px;
   gap: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
 }
 
 .brand {
@@ -390,7 +394,7 @@
   }
 }
 
-@media (max-width: 1480px) {
+@media (max-width: 1024px) {
   .topbar {
     grid-template-columns: auto auto 1fr;
     align-items: center;
@@ -443,7 +447,8 @@
   }
 
   .search-box {
-    width: min(220px, 100%);
+  width: 100%;
+  max-width: 280px;
     min-width: 0;
   }
 
