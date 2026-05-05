@@ -5,6 +5,7 @@ const dashboardCourses = document.getElementById("dashboardCourses");
 const dashboardFunnel = document.getElementById("dashboardFunnel");
 const dashboardTrend = document.getElementById("dashboardTrend");
 const authStatus = document.getElementById("authStatus");
+const dashboardStatus = document.getElementById("dashboardStatus");
 
 function formatPct(value) {
   const safe = Number(value);
@@ -113,6 +114,19 @@ async function loadDashboard() {
   }
 
   try {
+    if (dashboardStatus) dashboardStatus.textContent = "Cargando metricas...";
+
+    if (dashboardTotals) {
+      dashboardTotals.innerHTML = `
+        <article class="dashboard-card"><h3>Clics CTA</h3><strong>0</strong><span class="kpi-note">Desde landing</span></article>
+        <article class="dashboard-card"><h3>Formulario (adquirir)</h3><strong>0</strong><span class="kpi-note">Inicios de compra</span></article>
+        <article class="dashboard-card"><h3>Vista pago</h3><strong>0</strong><span class="kpi-note">Pasa a Nequi</span></article>
+        <article class="dashboard-card"><h3>Finalizadas</h3><strong>0</strong><span class="kpi-note">Comprobante subido</span></article>
+        <article class="dashboard-card dashboard-card--accent"><h3>Conversion</h3><strong>0%</strong><span class="kpi-note">Finalizadas / Formulario</span></article>
+        <article class="dashboard-card"><h3>Conv. desde pago</h3><strong>0%</strong><span class="kpi-note">Finalizadas / Vista pago</span></article>
+      `;
+    }
+
     const response = await fetch("/api/admin/dashboard", {
       headers: {
         ...window.getAuthHeaders()
@@ -123,6 +137,7 @@ async function loadDashboard() {
 
     if (!response.ok) {
       authStatus.textContent = data.error || "No tienes acceso al dashboard.";
+      if (dashboardStatus) dashboardStatus.textContent = data.error || "No tienes acceso al dashboard.";
       return;
     }
 
@@ -146,6 +161,7 @@ async function loadDashboard() {
     renderBars(dashboardPages, pageEntries, { limit: 12 });
     renderFunnel(dashboardFunnel, data.funnel);
     renderTrend(dashboardTrend, data.byDay);
+    if (dashboardStatus) dashboardStatus.textContent = "Metricas actualizadas.";
 
     if (!courseEntries.length) {
       dashboardCourses.innerHTML = `<article class="dashboard-course-card"><h3>Sin datos aun</h3><p>No hay metricas registradas por curso.</p></article>`;
@@ -167,12 +183,14 @@ async function loadDashboard() {
     `).join("");
   } catch (_error) {
     authStatus.textContent = "No se pudo cargar el dashboard.";
+    if (dashboardStatus) dashboardStatus.textContent = "No se pudo cargar el dashboard (API no responde).";
   }
 }
 
 document.addEventListener("auth:changed", (event) => {
   if (!event.detail?.isAdmin) {
     authStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
+    if (dashboardStatus) dashboardStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
     return;
   }
 
@@ -182,12 +200,27 @@ document.addEventListener("auth:changed", (event) => {
 // Evita la carrera: si auth.js ya cargo al usuario antes de que este
 // archivo registrara el listener, igual pintamos el dashboard.
 window.addEventListener("load", () => {
-  if (window.currentUser?.isAdmin) {
-    loadDashboard();
-    return;
-  }
+  const start = Date.now();
+  const timer = window.setInterval(() => {
+    if (window.currentUser?.isAdmin) {
+      window.clearInterval(timer);
+      loadDashboard();
+      return;
+    }
 
-  if (window.currentUser && !window.currentUser.isAdmin) {
-    authStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
-  }
+    if (window.currentUser && !window.currentUser.isAdmin) {
+      window.clearInterval(timer);
+      authStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
+      if (dashboardStatus) dashboardStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
+      return;
+    }
+
+    if (Date.now() - start > 5500) {
+      window.clearInterval(timer);
+      if (dashboardStatus) {
+        dashboardStatus.textContent =
+          "No se detecto sesion aun. Si acabas de iniciar sesion, recarga la pagina (Ctrl+F5).";
+      }
+    }
+  }, 250);
 });
