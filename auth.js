@@ -7,9 +7,11 @@ const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 const logoutButton = document.getElementById("logoutButton");
 const adminDashboardLink = document.getElementById("adminDashboardLink");
+const googleReviewButton = document.getElementById("googleReviewButton");
 
 window.currentUser = null;
 window.googleClientId = null;
+window.googleReviewUrl = "";
 
 function getStoredToken() {
   return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -81,6 +83,12 @@ async function initGoogleLogin() {
     const configResponse = await fetch("/api/config");
     const config = await configResponse.json();
     window.googleClientId = config.googleClientId;
+    window.googleReviewUrl = config.googleReviewUrl || "";
+
+    if (googleReviewButton && window.googleReviewUrl) {
+      googleReviewButton.href = window.googleReviewUrl;
+      googleReviewButton.classList.remove("hidden");
+    }
 
     if (!window.google?.accounts?.id || !window.googleClientId) {
       authStatus.textContent = "No se pudo cargar Google Sign-In.";

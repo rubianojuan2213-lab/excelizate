@@ -29,8 +29,9 @@ const {
   GOOGLE_REDIRECT_URI,
   GOOGLE_CALENDAR_ID = "primary",
   APP_BASE_URL = "http://localhost:3000",
-  FRONTEND_URL = "http://localhost:3000",
+  FRONTEND_URL,
   ADMIN_EMAILS = "rubianojuan2213@gmail.com",
+  GOOGLE_REVIEW_URL = "",
   SMTP_HOST,
   SMTP_PORT,
   SMTP_SECURE,
@@ -52,6 +53,8 @@ const oauth2Client = new google.auth.OAuth2(
 
 const googleIdClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 const adminEmails = ADMIN_EMAILS.split(",").map((item) => item.trim().toLowerCase()).filter(Boolean);
+const frontendUrl = FRONTEND_URL || APP_BASE_URL;
+const allowedOrigins = [frontendUrl, APP_BASE_URL, "http://localhost:3000", "http://127.0.0.1:5500", "http://localhost:5500"];
 
 function ensureFile(filePath, initialData) {
   if (!fs.existsSync(filePath)) {
@@ -290,8 +293,8 @@ app.use(cors({
     if (
       origin.startsWith("http://127.0.0.1:") ||
       origin.startsWith("http://localhost:") ||
-      origin === FRONTEND_URL ||
-      origin === "null"
+      origin === "null" ||
+      allowedOrigins.includes(origin)
     ) {
       callback(null, true);
       return;
@@ -313,7 +316,8 @@ app.get("/", (_req, res) => {
 app.get("/api/config", (_req, res) => {
   res.json({
     googleClientId: GOOGLE_CLIENT_ID,
-    adminEmails
+    adminEmails,
+    googleReviewUrl: GOOGLE_REVIEW_URL
   });
 });
 

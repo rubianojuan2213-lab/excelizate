@@ -17,25 +17,144 @@
   z-index: 120;
 }
 
+.topbar {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.brand-logo {
+  width: 98px;
+  max-width: none;
+}
+
+.nav-pill {
+  justify-content: center;
+  gap: 4px;
+}
+
+.nav-item {
+  padding: 12px 12px;
+  font-size: 0.92rem;
+}
+
+.nav-tools {
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.search-shell {
+  min-width: 0;
+}
+
+.search-box {
+  min-width: 190px;
+}
+
+.user-chip {
+  max-width: 280px;
+}
+
+.user-chip > div {
+  min-width: 0;
+}
+
+.user-chip strong,
+.user-chip span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-link {
+  white-space: nowrap;
+}
+
 .auth-card {
-  width: min(460px, calc(100% - 24px));
-  padding: 32px;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 24px 60px rgba(15, 45, 95, 0.2);
+  width: min(520px, calc(100% - 24px));
+  padding: 36px 28px;
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(18, 179, 172, 0.22), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(239, 90, 60, 0.18), transparent 28%),
+    linear-gradient(135deg, rgba(53, 198, 180, 0.9), rgba(36, 120, 178, 0.94));
+  box-shadow: 0 28px 70px rgba(6, 22, 54, 0.26);
   text-align: center;
+  color: #fff;
 }
 
 .auth-logo {
-  width: 140px;
+  width: 82px;
   display: block;
-  margin: 0 auto 18px;
+  margin: 0 auto;
+}
+
+.auth-hexagon {
+  position: relative;
+  padding: 86px 28px 28px;
+  border-radius: 42px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.auth-hexagon::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+  pointer-events: none;
+}
+
+.auth-avatar-badge {
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 96px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.55));
+  box-shadow: 0 18px 36px rgba(6, 22, 54, 0.22);
+}
+
+.auth-card h2 {
+  margin: 0 0 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card p {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-meta {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.auth-meta span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .google-signin-slot {
   display: flex;
   justify-content: center;
   margin-top: 18px;
+  position: relative;
+  z-index: 1;
 }
 
 .nav-toggle {
@@ -133,6 +252,10 @@
 
 .signed-user-inline span {
   color: var(--muted);
+}
+
+.testimonial-form .signed-user-box {
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .testimonial-author {
@@ -245,10 +368,12 @@
 @media (max-width: 920px) {
   .topbar {
     grid-template-columns: auto auto 1fr;
+    align-items: start;
   }
 
   .nav-toggle {
     display: inline-block;
+    justify-self: start;
   }
 
   .nav-pill {
@@ -263,6 +388,7 @@
     display: none;
     flex-direction: column;
     align-items: stretch;
+    z-index: 40;
   }
 
   .nav-pill.is-open {
@@ -277,20 +403,75 @@
   .nav-tools {
     justify-content: flex-end;
     flex-wrap: wrap;
+    gap: 8px;
   }
 
   .user-chip {
     width: 100%;
     justify-content: space-between;
+    max-width: none;
+  }
+
+  .search-shell {
+    width: 100%;
+    order: 3;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .admin-link {
+    order: 2;
   }
 }
 
 @media (max-width: 720px) {
+  .topbar {
+    grid-template-columns: auto auto;
+    gap: 10px;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .nav-toggle {
+    order: 2;
+    justify-self: end;
+  }
+
+  .nav-tools {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
   .hero-video--compact {
     max-height: 280px;
   }
 
   .dashboard-shell {
     width: min(100% - 18px, 100%);
+  }
+
+  .user-chip {
+    padding: 10px 12px;
+  }
+
+  .user-chip img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .chip-logout {
+    padding: 8px 12px;
+  }
+
+  .auth-card {
+    padding: 22px 16px;
+  }
+
+  .auth-hexagon {
+    padding: 78px 18px 22px;
   }
 }

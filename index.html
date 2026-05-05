@@ -21,10 +21,18 @@
 
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-card">
-      <img class="auth-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
-      <h2>Ingresa con Google para continuar</h2>
-      <p>Tu acceso permite gestionar testimonios, reservas, compras y seguimiento del proceso.</p>
-      <div id="googleSignInButton" class="google-signin-slot"></div>
+      <div class="auth-hexagon">
+        <div class="auth-avatar-badge">
+          <img class="auth-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+        </div>
+        <h2>Ingresar</h2>
+        <p>Accede con Google para gestionar compras, testimonios y reservas.</p>
+        <div id="googleSignInButton" class="google-signin-slot"></div>
+        <div class="auth-meta">
+          <span>Acceso seguro</span>
+          <span>Marca oficial</span>
+        </div>
+      </div>
       <p class="payment-note" id="authStatus">Inicia sesion con tu cuenta de Google.</p>
     </div>
   </div>
@@ -335,6 +343,9 @@
           <span class="section-tag">Testimonios</span>
           <h2>Comparte tu experiencia con Excelizate Pro.</h2>
           <p>Tu testimonio quedara ligado a tu cuenta de Google, con posibilidad de editarlo o borrarlo mas adelante.</p>
+          <div class="hero-actions">
+            <a class="secondary-action hidden" id="googleReviewButton" href="#" target="_blank" rel="noopener noreferrer">Dejar resena en Google</a>
+          </div>
         </div>
 
         <div class="testimonials-layout">
