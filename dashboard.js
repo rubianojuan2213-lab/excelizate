@@ -7,6 +7,12 @@ const dashboardTrend = document.getElementById("dashboardTrend");
 const authStatus = document.getElementById("authStatus");
 const dashboardStatus = document.getElementById("dashboardStatus");
 
+const DASHBOARD_JS_BUILD = "2026-05-05-03";
+
+if (dashboardStatus) {
+  dashboardStatus.textContent = `Dashboard JS: ${DASHBOARD_JS_BUILD}`;
+}
+
 function formatPct(value) {
   const safe = Number(value);
   if (!Number.isFinite(safe)) return "0%";
