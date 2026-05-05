@@ -178,3 +178,16 @@ document.addEventListener("auth:changed", (event) => {
 
   loadDashboard();
 });
+
+// Evita la carrera: si auth.js ya cargo al usuario antes de que este
+// archivo registrara el listener, igual pintamos el dashboard.
+window.addEventListener("load", () => {
+  if (window.currentUser?.isAdmin) {
+    loadDashboard();
+    return;
+  }
+
+  if (window.currentUser && !window.currentUser.isAdmin) {
+    authStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
+  }
+});
