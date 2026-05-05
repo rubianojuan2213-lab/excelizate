@@ -395,6 +395,7 @@
 }
 
 @media (max-width: 1024px) {
+
   .topbar {
     grid-template-columns: auto auto 1fr;
     align-items: center;
@@ -572,4 +573,15 @@
   .admin-link {
     flex: 0 0 auto;
   }
+}
+@media (max-width: 1200px) {
+
+  .nav-pill {
+    display: none;
+  }
+
+  .nav-toggle {
+    display: block;
+  }
+
 }
