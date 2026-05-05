@@ -1,5 +1,4 @@
 const testimonialForm = document.getElementById("testimonialForm");
-const testimonialEmail = document.getElementById("testimonialEmail");
 const testimonialMessage = document.getElementById("testimonialMessage");
 const testimonialRating = document.getElementById("testimonialRating");
 const testimonialStatus = document.getElementById("testimonialStatus");
@@ -7,15 +6,13 @@ const testimonialList = document.getElementById("testimonialList");
 const testimonialSubmit = document.getElementById("testimonialSubmit");
 const testimonialCancel = document.getElementById("testimonialCancel");
 const ratingStars = document.querySelectorAll(".rating-star");
+const testimonialUserBox = document.getElementById("testimonialUserBox");
 
 let editingId = null;
 
-function formatTestimonialDate(value) {
+function formatDate(value) {
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
+  if (Number.isNaN(date.getTime())) return "";
 
   return date.toLocaleDateString("es-CO", {
     year: "numeric",
@@ -31,15 +28,32 @@ function setRating(value) {
   });
 }
 
-async function loadTestimonials() {
-  if (!testimonialList) {
+function renderUserBox(user) {
+  if (!testimonialUserBox) return;
+
+  if (!user) {
+    testimonialUserBox.textContent = "Inicia sesion con Google para dejar tu testimonio.";
     return;
   }
+
+  testimonialUserBox.innerHTML = `
+    <div class="signed-user-inline">
+      <img src="${user.picture || "logo-excelizatepro.png"}" alt="${user.name}">
+      <div>
+        <strong>${user.name}</strong>
+        <span>${user.email}</span>
+      </div>
+    </div>
+  `;
+}
+
+async function loadTestimonials() {
+  if (!testimonialList) return;
 
   testimonialList.innerHTML = "<p class=\"payment-note\">Cargando testimonios...</p>";
 
   try {
-    const response = await fetch("http://localhost:3000/api/testimonials");
+    const response = await fetch("/api/testimonials");
     const testimonials = await response.json();
 
     if (!Array.isArray(testimonials) || !testimonials.length) {
@@ -50,21 +64,26 @@ async function loadTestimonials() {
     testimonialList.innerHTML = testimonials.map((testimonial) => `
       <article class="testimonial-card">
         <header>
-          <div>
-            <div class="testimonial-email">${testimonial.email}</div>
-            <div class="testimonial-date">${testimonial.updatedAt ? `Editado el ${formatTestimonialDate(testimonial.updatedAt)}` : `Publicado el ${formatTestimonialDate(testimonial.createdAt)}`}</div>
-            <div class="testimonial-stars">${"★".repeat(testimonial.rating)}${"☆".repeat(5 - testimonial.rating)}</div>
+          <div class="testimonial-author">
+            <img src="${testimonial.picture || "logo-excelizatepro.png"}" alt="${testimonial.name || testimonial.email}">
+            <div>
+              <div class="testimonial-email">${testimonial.name || testimonial.email}</div>
+              <div class="testimonial-date">${testimonial.updatedAt ? `Editado el ${formatDate(testimonial.updatedAt)}` : `Publicado el ${formatDate(testimonial.createdAt)}`}</div>
+              <div class="testimonial-stars">${"★".repeat(testimonial.rating)}${"☆".repeat(5 - testimonial.rating)}</div>
+            </div>
           </div>
         </header>
         <p>${testimonial.message}</p>
-        <div class="testimonial-actions">
-          <button class="edit-btn" type="button" data-edit-id="${testimonial.id}">Editar</button>
-          <button class="delete-btn" type="button" data-delete-id="${testimonial.id}">Borrar</button>
-        </div>
+        ${window.currentUser && testimonial.authorSub === window.currentUser.sub ? `
+          <div class="testimonial-actions">
+            <button class="edit-btn" type="button" data-edit-id="${testimonial.id}">Editar</button>
+            <button class="delete-btn" type="button" data-delete-id="${testimonial.id}">Borrar</button>
+          </div>
+        ` : ""}
       </article>
     `).join("");
   } catch (_error) {
-    testimonialList.innerHTML = "<p class=\"payment-note\">No se pudieron cargar los testimonios. Verifica que el servidor local este encendido.</p>";
+    testimonialList.innerHTML = "<p class=\"payment-note\">No se pudieron cargar los testimonios.</p>";
   }
 }
 
@@ -84,49 +103,32 @@ testimonialCancel?.addEventListener("click", () => {
 
 testimonialList?.addEventListener("click", async (event) => {
   const target = event.target;
-
-  if (!(target instanceof HTMLButtonElement)) {
-    return;
-  }
+  if (!(target instanceof HTMLButtonElement)) return;
 
   const editId = target.dataset.editId;
   const deleteId = target.dataset.deleteId;
 
   if (editId) {
-    try {
-      const response = await fetch("http://localhost:3000/api/testimonials");
-      const testimonials = await response.json();
-      const testimonial = testimonials.find((item) => item.id === Number(editId));
+    const response = await fetch("/api/testimonials");
+    const testimonials = await response.json();
+    const testimonial = testimonials.find((item) => item.id === Number(editId));
 
-      if (!testimonial) {
-        return;
-      }
+    if (!testimonial) return;
 
-      editingId = testimonial.id;
-      testimonialEmail.value = testimonial.email;
-      testimonialMessage.value = testimonial.message;
-      setRating(testimonial.rating);
-      testimonialSubmit.textContent = "Actualizar testimonio";
-      testimonialStatus.textContent = "Estas editando tu testimonio. Usa el mismo correo para guardar cambios.";
-      testimonialForm.scrollIntoView({ behavior: "smooth", block: "center" });
-    } catch (_error) {
-      testimonialStatus.textContent = "No se pudo cargar el testimonio para editar.";
-    }
+    editingId = testimonial.id;
+    testimonialMessage.value = testimonial.message;
+    setRating(testimonial.rating);
+    testimonialSubmit.textContent = "Actualizar testimonio";
+    testimonialStatus.textContent = "Estas editando tu testimonio.";
+    testimonialForm.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   if (deleteId) {
-    const email = window.prompt("Para borrar tu testimonio, escribe el mismo correo con el que lo publicaste:");
-
-    if (!email) {
-      return;
-    }
-
-    const response = await fetch(`http://localhost:3000/api/testimonials/${deleteId}`, {
+    const response = await fetch(`/api/testimonials/${deleteId}`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email })
+        ...window.getAuthHeaders()
+      }
     });
 
     const data = await response.json();
@@ -141,15 +143,19 @@ testimonialList?.addEventListener("click", async (event) => {
 testimonialForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  if (!window.currentUser) {
+    testimonialStatus.textContent = "Debes iniciar sesion con Google para dejar tu testimonio.";
+    return;
+  }
+
   const payload = {
-    email: testimonialEmail.value.trim(),
     message: testimonialMessage.value.trim(),
     rating: Number(testimonialRating.value)
   };
 
   const url = editingId
-    ? `http://localhost:3000/api/testimonials/${editingId}`
-    : "http://localhost:3000/api/testimonials";
+    ? `/api/testimonials/${editingId}`
+    : "/api/testimonials";
 
   const method = editingId ? "PUT" : "POST";
 
@@ -157,7 +163,8 @@ testimonialForm?.addEventListener("submit", async (event) => {
     const response = await fetch(url, {
       method,
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...window.getAuthHeaders()
       },
       body: JSON.stringify(payload)
     });
@@ -182,5 +189,11 @@ testimonialForm?.addEventListener("submit", async (event) => {
   }
 });
 
+document.addEventListener("auth:changed", (event) => {
+  renderUserBox(event.detail);
+  loadTestimonials();
+});
+
 setRating(5);
+renderUserBox(window.currentUser);
 loadTestimonials();

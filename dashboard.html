@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin | Excelizate Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo-excelizatepro.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="overrides.css">
+</head>
+<body>
+  <div class="auth-overlay hidden" id="authOverlay">
+    <div class="auth-card">
+      <img class="auth-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+      <h2>Ingresa con Google para continuar</h2>
+      <p>El dashboard es exclusivo para administradores.</p>
+      <div id="googleSignInButton" class="google-signin-slot"></div>
+      <p class="payment-note" id="authStatus">Inicia sesion con una cuenta autorizada.</p>
+    </div>
+  </div>
+
+  <div class="dashboard-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="Excelizate Pro">
+        <img class="brand-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+      </a>
+
+      <nav class="nav-pill" aria-label="Principal">
+        <a class="nav-item active" href="dashboard.html">Dashboard</a>
+        <a class="nav-item" href="index.html#cursos">Cursos</a>
+        <a class="nav-item" href="index.html#contacto">Contacto</a>
+      </nav>
+
+      <div class="nav-tools">
+        <div class="user-chip hidden" id="userChip">
+          <img id="userAvatar" alt="Usuario">
+          <div>
+            <strong id="userName">Usuario</strong>
+            <span id="userEmail">correo@google.com</span>
+          </div>
+          <button class="chip-logout" id="logoutButton" type="button">Salir</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section-heading">
+        <span class="section-tag">Admin</span>
+        <h1>Dashboard de metricas</h1>
+        <p>Consulta comportamiento de botones, inicios de compra, vistas de pago, compras finalizadas y desistimientos por curso.</p>
+      </section>
+
+      <div class="dashboard-grid" id="dashboardTotals"></div>
+      <div class="dashboard-course-grid" id="dashboardCourses"></div>
+    </main>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

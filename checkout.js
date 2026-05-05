@@ -4,11 +4,7 @@ const courseCatalog = {
     title: "Excel basico (desde cero)",
     price: "$49.900 COP",
     description: "Empieza desde lo fundamental y domina formulas, tablas, funciones y reportes utiles.",
-    points: [
-      "Entrega digital del contenido",
-      "Ideal para principiantes",
-      "Acceso practico y claro"
-    ],
+    points: ["Entrega digital del contenido", "Ideal para principiantes", "Acceso practico y claro"],
     posterClass: "course-cover--excel-basico",
     personalized: false
   },
@@ -17,11 +13,7 @@ const courseCatalog = {
     title: "Excel intermedio",
     price: "$69.900 COP",
     description: "Refuerza tu manejo de funciones, analisis y herramientas aplicadas al trabajo diario.",
-    points: [
-      "Funciones de nivel intermedio",
-      "Aplicado a reportes reales",
-      "Pensado para avanzar con orden"
-    ],
+    points: ["Funciones de nivel intermedio", "Aplicado a reportes reales", "Pensado para avanzar con orden"],
     posterClass: "course-cover--excel-intermedio",
     personalized: false
   },
@@ -30,11 +22,7 @@ const courseCatalog = {
     title: "Excel avanzado",
     price: "$89.900 COP",
     description: "Profundiza en dashboards, tablas dinamicas, power query y automatizacion.",
-    points: [
-      "Enfoque avanzado y profesional",
-      "Herramientas para analisis de datos",
-      "Mayor productividad en oficina o negocio"
-    ],
+    points: ["Enfoque avanzado y profesional", "Herramientas para analisis de datos", "Mayor productividad en oficina o negocio"],
     posterClass: "course-cover--excel-avanzado",
     personalized: false
   },
@@ -43,11 +31,7 @@ const courseCatalog = {
     title: "Contabilidad basica",
     price: "$59.900 COP",
     description: "Entiende los fundamentos contables, los registros y la estructura financiera esencial.",
-    points: [
-      "Principios y registros contables",
-      "Libro diario y mayor",
-      "Base ideal para emprender o trabajar"
-    ],
+    points: ["Principios y registros contables", "Libro diario y mayor", "Base ideal para emprender o trabajar"],
     posterClass: "course-cover--contabilidad",
     personalized: false
   },
@@ -56,11 +40,7 @@ const courseCatalog = {
     title: "Manejo de programa Siigo",
     price: "$79.900 COP",
     description: "Aprende a manejar configuracion, clientes, compras, ventas, inventarios y reportes.",
-    points: [
-      "Paso a paso dentro del sistema",
-      "Util para operacion administrativa",
-      "Pensado para uso practico"
-    ],
+    points: ["Paso a paso dentro del sistema", "Util para operacion administrativa", "Pensado para uso practico"],
     posterClass: "course-cover--siigo",
     personalized: false
   },
@@ -69,11 +49,7 @@ const courseCatalog = {
     title: "Clase personalizada",
     price: "$29.950 COP / hora",
     description: "Reserva una sesion 1 a 1 y elige el dia y la hora que mas te convenga.",
-    points: [
-      "Atencion enfocada en tu necesidad",
-      "Eliges fecha y hora",
-      "Acompanamiento personalizado"
-    ],
+    points: ["Atencion enfocada en tu necesidad", "Eliges fecha y hora", "Acompanamiento personalizado"],
     posterClass: "course-cover--personalizada",
     personalized: true
   }
@@ -96,12 +72,6 @@ const submitButton = document.getElementById("submitButton");
 const purchaseForm = document.getElementById("purchaseForm");
 const classDate = document.getElementById("classDate");
 const classTime = document.getElementById("classTime");
-const paymentChoice = "Wompi";
-const calendarApiBase = "http://localhost:3000";
-
-if (classDate) {
-  classDate.min = new Date().toISOString().split("T")[0];
-}
 
 function formatGoogleDate(dateString, timeString, extraHours = 1) {
   const start = new Date(`${dateString}T${timeString}:00`);
@@ -110,12 +80,26 @@ function formatGoogleDate(dateString, timeString, extraHours = 1) {
   return `${toStamp(start)}/${toStamp(end)}`;
 }
 
+fetch("/api/metrics/track", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    eventType: "acquire_view",
+    courseKey: selectedCourse,
+    source: "adquirir"
+  })
+}).catch(() => {});
+
+if (classDate) {
+  classDate.min = new Date().toISOString().split("T")[0];
+}
+
 purchaseType.textContent = course.type;
 purchaseTitle.textContent = course.title;
 purchasePrice.textContent = course.price;
 purchaseDescription.textContent = course.description;
 purchasePoster.classList.add("course-cover", course.posterClass);
-submitButton.textContent = course.personalized ? "Solicitar reserva" : "Solicitar curso";
+submitButton.textContent = course.personalized ? "Solicitar reserva" : "Continuar a pago";
 formIntro.textContent = course.personalized
   ? "Completa tus datos y escoge la fecha de tu clase personalizada."
   : "Completa tus datos y elige por donde deseas recibir el curso.";
@@ -141,51 +125,45 @@ purchaseForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const formData = new FormData(purchaseForm);
-  const name = formData.get("fullName");
-  const phone = formData.get("phone");
-  const email = formData.get("email");
-  const notes = formData.get("notes") || "";
   const [teacherName, teacherPhone, teacherRole] = String(formData.get("teacher") || "").split("|");
 
   const order = {
     courseKey: selectedCourse,
     courseTitle: course.title,
     courseType: course.type,
-    name,
-    phone,
-    email,
-    notes,
+    price: course.price,
+    name: formData.get("fullName"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    notes: formData.get("notes") || "",
     teacherName,
     teacherPhone,
     teacherRole,
-    paymentChoice,
-    price: course.price
+    paymentChoice: "Nequi"
   };
 
   if (course.personalized) {
-    const date = formData.get("classDate");
-    const time = formData.get("classTime");
-    order.date = date;
-    order.time = time;
-    order.googleSchedule = formatGoogleDate(date, time);
+    order.date = formData.get("classDate");
+    order.time = formData.get("classTime");
+    order.googleSchedule = formatGoogleDate(order.date, order.time);
 
     try {
-      const bookingResponse = await fetch(`${calendarApiBase}/api/calendar/book`, {
+      const bookingResponse = await fetch("/api/calendar/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          summary: `${course.title} - ${name}`,
+          summary: `${course.title} - ${order.name}`,
           description:
             `Reserva solicitada en Excelizate Pro.\n` +
-            `Cliente: ${name}\n` +
-            `Celular: ${phone}\n` +
-            `Correo: ${email}\n` +
+            `Cliente: ${order.name}\n` +
+            `Celular: ${order.phone}\n` +
+            `Correo: ${order.email}\n` +
             `Profesor elegido: ${teacherName}\n` +
-            `Detalle: ${notes || "Sin detalle adicional"}`,
-          date,
-          time,
+            `Detalle: ${order.notes || "Sin detalle adicional"}`,
+          date: order.date,
+          time: order.time,
           durationMinutes: 60
         })
       });
@@ -199,11 +177,9 @@ purchaseForm?.addEventListener("submit", async (event) => {
         order.googleEventLink = bookingData.eventLink;
       }
     } catch (_error) {
-      // Si el backend local no esta corriendo, seguimos con el flujo de respaldo.
+      // fallback
     }
-  }
-
-  if (!course.personalized) {
+  } else {
     order.deliveryMethod = formData.get("deliveryMethod");
   }
 

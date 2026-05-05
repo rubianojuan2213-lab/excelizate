@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="logo-excelizatepro.png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="overrides.css">
 </head>
 <body>
   <div class="preloader" id="preloader" aria-hidden="true">
@@ -18,19 +19,36 @@
     </div>
   </div>
 
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <img class="auth-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+      <h2>Ingresa con Google para continuar</h2>
+      <p>Tu acceso permite gestionar testimonios, reservas, compras y seguimiento del proceso.</p>
+      <div id="googleSignInButton" class="google-signin-slot"></div>
+      <p class="payment-note" id="authStatus">Inicia sesion con tu cuenta de Google.</p>
+    </div>
+  </div>
+
   <div class="page-shell">
     <header class="topbar">
       <a class="brand" href="#inicio" aria-label="Excelizate Pro">
         <img class="brand-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
       </a>
 
-      <nav class="nav-pill" aria-label="Principal">
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="nav-pill" id="mainNav" aria-label="Principal">
         <a class="nav-item active" href="#inicio">Inicio</a>
         <a class="nav-item" href="#cursos">Cursos</a>
         <a class="nav-item" href="#metodo">Metodo</a>
         <a class="nav-item" href="#beneficios">Beneficios</a>
         <a class="nav-item" href="#testimonios">Testimonios</a>
         <a class="nav-item" href="#profesores">Profesores</a>
+        <a class="nav-item" href="#sobre-nosotros">Sobre nosotros</a>
         <a class="nav-item" href="#contacto">Contacto</a>
       </nav>
 
@@ -51,6 +69,15 @@
             <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3.86 0-7 2.24-7 5v1h2v-1c0-1.45 2.13-3 5-3s5 1.55 5 3v1h2v-1c0-2.76-3.14-5-7-5Z"/>
           </svg>
         </a>
+        <a class="secondary-action admin-link hidden" id="adminDashboardLink" href="dashboard.html">Dashboard</a>
+        <div class="user-chip hidden" id="userChip">
+          <img id="userAvatar" alt="Usuario">
+          <div>
+            <strong id="userName">Usuario</strong>
+            <span id="userEmail">correo@google.com</span>
+          </div>
+          <button class="chip-logout" id="logoutButton" type="button">Salir</button>
+        </div>
       </div>
     </header>
 
@@ -71,7 +98,7 @@
         </div>
 
         <div class="hero-media" aria-label="Video de presentacion">
-          <video class="hero-video" autoplay muted loop playsinline controls poster="logo-excelizatepro.png">
+          <video class="hero-video hero-video--compact" autoplay muted loop playsinline controls poster="logo-excelizatepro.png">
             <source src="hero-video.mp4" type="video/mp4">
             Tu navegador no soporta video.
           </video>
@@ -307,14 +334,14 @@
         <div class="section-heading">
           <span class="section-tag">Testimonios</span>
           <h2>Comparte tu experiencia con Excelizate Pro.</h2>
-          <p>Deja tu correo, escribe tu testimonio y califica tu experiencia de 1 a 5 estrellas. Tu testimonio quedara publicado aqui y podras editarlo o borrarlo con el mismo correo.</p>
+          <p>Tu testimonio quedara ligado a tu cuenta de Google, con posibilidad de editarlo o borrarlo mas adelante.</p>
         </div>
 
         <div class="testimonials-layout">
           <form class="testimonial-form" id="testimonialForm">
-            <div class="field">
-              <label for="testimonialEmail">Correo electronico</label>
-              <input id="testimonialEmail" name="email" type="email" placeholder="tunombre@correo.com" required>
+            <div class="field user-preview-field">
+              <label>Cuenta usada</label>
+              <div class="signed-user-box" id="testimonialUserBox">Inicia sesion con Google para dejar tu testimonio.</div>
             </div>
 
             <div class="field">
@@ -391,6 +418,29 @@
         </div>
       </section>
 
+      <section class="content-section" id="sobre-nosotros">
+        <div class="section-heading">
+          <span class="section-tag">Sobre nosotros</span>
+          <h2>Excelizate Pro nace para ayudarte a crecer con herramientas practicas.</h2>
+          <p>Somos un equipo con enfoque administrativo y financiero que busca ensenar de forma simple, util y cercana, para que cada alumno avance con seguridad en su vida laboral, academica o emprendedora.</p>
+        </div>
+
+        <div class="about-grid">
+          <article class="about-card">
+            <h3>Nuestra vision</h3>
+            <p>Acercar el conocimiento de Excel, contabilidad y herramientas administrativas a personas que quieren mejorar su perfil y abrir nuevas oportunidades.</p>
+          </article>
+          <article class="about-card">
+            <h3>Nuestro estilo</h3>
+            <p>Explicamos sin tecnicismos innecesarios, con ejemplos reales, apoyo cercano y materiales pensados para aplicar desde el primer dia.</p>
+          </article>
+          <article class="about-card">
+            <h3>Nuestro compromiso</h3>
+            <p>Dar una experiencia clara, humana y util, cuidando el proceso de compra, la atencion al estudiante y el seguimiento posterior.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="content-section content-section--contact" id="contacto">
         <div class="section-heading">
           <span class="section-tag">Contacto</span>
@@ -432,6 +482,8 @@
     </main>
   </div>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
   <script src="script.js"></script>
   <script src="testimonials.js"></script>
 </body>

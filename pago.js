@@ -15,6 +15,16 @@ if (!order.courseTitle) {
   window.location.href = "index.html#cursos";
 }
 
+fetch("/api/metrics/track", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    eventType: "payment_view",
+    courseKey: order.courseKey || "general",
+    source: "pago"
+  })
+}).catch(() => {});
+
 paymentTitle.textContent = order.courseType === "Clase personalizada"
   ? "Tu reserva esta lista para pago"
   : "Tu curso esta listo para pago";
@@ -77,24 +87,30 @@ receiptForm?.addEventListener("submit", async (event) => {
   formData.append("customerPhone", order.phone || "");
   formData.append("customerEmail", order.email || "");
   formData.append("courseTitle", order.courseTitle || "");
+  formData.append("courseKey", order.courseKey || "");
   formData.append("teacherName", order.teacherName || "");
 
   receiptStatus.textContent = "Subiendo comprobante...";
 
   try {
-    const response = await fetch("http://localhost:3000/api/payments/upload", {
+    const response = await fetch("/api/payments/upload", {
       method: "POST",
+      headers: {
+        ...window.getAuthHeaders()
+      },
       body: formData
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      receiptStatus.textContent = "No se pudo guardar el comprobante. Intenta de nuevo.";
+      receiptStatus.textContent = data.error || "No se pudo guardar el comprobante.";
       return;
     }
 
     receiptStatus.textContent = "Comprobante recibido correctamente. Nos comunicaremos contigo para validar el acceso.";
     receiptForm.reset();
   } catch (_error) {
-    receiptStatus.textContent = "El servidor local no esta disponible para recibir comprobantes.";
+    receiptStatus.textContent = "El servidor no esta disponible para recibir comprobantes.";
   }
 });

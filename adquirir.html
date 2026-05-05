@@ -9,12 +9,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="logo-excelizatepro.png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="overrides.css">
 </head>
 <body class="purchase-page">
   <div class="preloader" id="preloader" aria-hidden="true">
     <div class="preloader-box">
       <img src="logo-excelizatepro.png" alt="Logo de Excelizate Pro">
       <p>Cargando Excelizate Pro...</p>
+    </div>
+  </div>
+
+  <div class="auth-overlay hidden" id="authOverlay">
+    <div class="auth-card">
+      <img class="auth-logo" src="logo-excelizatepro.png" alt="Excelizate Pro">
+      <h2>Ingresa con Google para continuar</h2>
+      <p>Tu acceso permite gestionar reservas, pagos y testimonios.</p>
+      <div id="googleSignInButton" class="google-signin-slot"></div>
+      <p class="payment-note" id="authStatus">Inicia sesion con tu cuenta de Google.</p>
     </div>
   </div>
 
@@ -26,11 +37,20 @@
 
       <nav class="nav-pill" aria-label="Principal">
         <a class="nav-item active" href="index.html#cursos">Cursos</a>
-        <a class="nav-item" href="index.html#metodo">Metodo</a>
+        <a class="nav-item" href="index.html#profesores">Profesores</a>
         <a class="nav-item" href="index.html#contacto">Contacto</a>
       </nav>
 
       <div class="nav-tools">
+        <a class="secondary-action admin-link hidden" id="adminDashboardLink" href="dashboard.html">Dashboard</a>
+        <div class="user-chip hidden" id="userChip">
+          <img id="userAvatar" alt="Usuario">
+          <div>
+            <strong id="userName">Usuario</strong>
+            <span id="userEmail">correo@google.com</span>
+          </div>
+          <button class="chip-logout" id="logoutButton" type="button">Salir</button>
+        </div>
         <a class="secondary-action" href="index.html#cursos">Volver</a>
       </div>
     </header>
@@ -138,6 +158,8 @@
     </main>
   </div>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
   <script src="script.js"></script>
   <script src="checkout.js"></script>
 </body>
