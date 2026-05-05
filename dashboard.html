@@ -50,23 +50,54 @@
       <section class="section-heading">
         <span class="section-tag">Admin</span>
         <h1>Dashboard de metricas</h1>
-        <p>Consulta comportamiento de botones, inicios de compra, vistas de pago, compras finalizadas y desistimientos por curso.</p>
+        <p>Visualiza interacciones reales del sitio: embudo, clics por boton, paginas mas visitadas y tendencia por dia.</p>
       </section>
 
       <div class="dashboard-grid" id="dashboardTotals"></div>
-      <section class="section-heading section-heading--compact">
-        <span class="section-tag">Botones</span>
-        <h2>Interacciones por boton</h2>
-        <p>Visualiza cuales botones reciben mas clics dentro del sitio, incluyendo menu, llamados a la accion, busqueda y accesos de compra.</p>
-      </section>
-      <div class="dashboard-button-grid" id="dashboardButtons"></div>
 
-      <section class="section-heading section-heading--compact">
-        <span class="section-tag">Cursos</span>
-        <h2>Embudo por curso</h2>
-        <p>Revisa clics iniciales, inicios de compra, visitas al pago, compras finalizadas y desistimientos por cada curso.</p>
+      <section class="dashboard-panels">
+        <article class="dashboard-panel">
+          <header class="dashboard-panel__header">
+            <h2>Embudo general</h2>
+            <p>En que parte se devuelve la gente (conversion por etapa).</p>
+          </header>
+          <div id="dashboardFunnel" class="dashboard-funnel"></div>
+        </article>
+
+        <article class="dashboard-panel">
+          <header class="dashboard-panel__header">
+            <h2>Tendencia (ultimos dias)</h2>
+            <p>Vistas de pago y compras finalizadas por dia.</p>
+          </header>
+          <div id="dashboardTrend" class="dashboard-trend"></div>
+        </article>
       </section>
-      <div class="dashboard-course-grid" id="dashboardCourses"></div>
+
+      <section class="dashboard-panels dashboard-panels--three">
+        <article class="dashboard-panel">
+          <header class="dashboard-panel__header">
+            <h2>Top botones</h2>
+            <p>Donde mas hacen clic.</p>
+          </header>
+          <div id="dashboardButtons" class="dashboard-bars"></div>
+        </article>
+
+        <article class="dashboard-panel">
+          <header class="dashboard-panel__header">
+            <h2>Top paginas</h2>
+            <p>Origen/pagina mas frecuente en eventos.</p>
+          </header>
+          <div id="dashboardPages" class="dashboard-bars"></div>
+        </article>
+
+        <article class="dashboard-panel">
+          <header class="dashboard-panel__header">
+            <h2>Embudo por curso</h2>
+            <p>Conversion por curso (CTA → Pago → Finalizada).</p>
+          </header>
+          <div id="dashboardCourses" class="dashboard-course-grid"></div>
+        </article>
+      </section>
     </main>
   </div>
 

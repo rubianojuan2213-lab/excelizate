@@ -230,6 +230,33 @@ function summarizeMetrics() {
 
   const perCourse = {};
   const perButton = {};
+  const perPage = {};
+  const perDay = {};
+
+  const dayKey = (isoString) => {
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return "invalid";
+    return date.toISOString().slice(0, 10);
+  };
+
+  const bumpDay = (key, eventType) => {
+    if (!perDay[key]) {
+      perDay[key] = {
+        ctaClicks: 0,
+        started: 0,
+        paymentViews: 0,
+        completed: 0,
+        buttonClicks: 0,
+        logins: 0
+      };
+    }
+    if (eventType === "course_cta_click") perDay[key].ctaClicks += 1;
+    if (eventType === "acquire_view") perDay[key].started += 1;
+    if (eventType === "payment_view") perDay[key].paymentViews += 1;
+    if (eventType === "purchase_complete") perDay[key].completed += 1;
+    if (eventType === "button_click") perDay[key].buttonClicks += 1;
+    if (eventType === "login_success") perDay[key].logins += 1;
+  };
 
   metrics.forEach((item) => {
     const key = item.courseKey || "general";
@@ -251,24 +278,59 @@ function summarizeMetrics() {
       const buttonKey = item.buttonKey || "sin-etiqueta";
       perButton[buttonKey] = (perButton[buttonKey] || 0) + 1;
     }
+
+    const pageKey =
+      String(item.page || item.source || item.href || "")
+        .trim() || "sin-pagina";
+    perPage[pageKey] = (perPage[pageKey] || 0) + 1;
+
+    bumpDay(dayKey(item.createdAt), item.eventType);
   });
 
   Object.values(perCourse).forEach((course) => {
     course.dropOff = Math.max(course.started - course.completed, 0);
+    course.conversion = course.started ? course.completed / course.started : 0;
+    course.paymentConversion = course.paymentViews ? course.completed / course.paymentViews : 0;
   });
 
+  const totals = {
+    ctaClicks: metrics.filter((item) => item.eventType === "course_cta_click").length,
+    started: metrics.filter((item) => item.eventType === "acquire_view").length,
+    paymentViews: metrics.filter((item) => item.eventType === "payment_view").length,
+    completed: metrics.filter((item) => item.eventType === "purchase_complete").length,
+    buttonClicks: metrics.filter((item) => item.eventType === "button_click").length,
+    logins: metrics.filter((item) => item.eventType === "login_success").length,
+    testimonials: readJsonFile(TESTIMONIALS_PATH, []).length,
+    receipts: orders.length
+  };
+
+  const funnel = {
+    steps: [
+      { key: "ctaClicks", label: "Clic CTA", value: totals.ctaClicks },
+      { key: "started", label: "Formulario (adquirir)", value: totals.started },
+      { key: "paymentViews", label: "Vista pago", value: totals.paymentViews },
+      { key: "completed", label: "Compra finalizada", value: totals.completed }
+    ]
+  };
+
+  funnel.steps = funnel.steps.map((step, index, arr) => {
+    const prev = index === 0 ? step.value : arr[index - 1].value;
+    const rateFromPrev = prev ? step.value / prev : 0;
+    return { ...step, rateFromPrev };
+  });
+
+  const byDay = Object.entries(perDay)
+    .filter(([key]) => key !== "invalid")
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([date, values]) => ({ date, ...values }));
+
   return {
-    totals: {
-      ctaClicks: metrics.filter((item) => item.eventType === "course_cta_click").length,
-      started: metrics.filter((item) => item.eventType === "acquire_view").length,
-      paymentViews: metrics.filter((item) => item.eventType === "payment_view").length,
-      completed: metrics.filter((item) => item.eventType === "purchase_complete").length,
-      buttonClicks: metrics.filter((item) => item.eventType === "button_click").length,
-      testimonials: readJsonFile(TESTIMONIALS_PATH, []).length,
-      receipts: orders.length
-    },
+    totals,
+    funnel,
     perCourse,
-    perButton
+    perButton,
+    perPage,
+    byDay
   };
 }
 
