@@ -4,7 +4,6 @@ const navItems = document.querySelectorAll(".nav-item");
 const navContainer = document.getElementById("mainNav");
 const navToggle = document.getElementById("navToggle");
 const preloader = document.getElementById("preloader");
-const loadingTriggers = document.querySelectorAll("a[href]");
 const searchInput = document.getElementById("courseSearchInput");
 const searchResults = document.getElementById("searchResults");
 
@@ -67,6 +66,85 @@ function trackMetric(eventType, payload = {}) {
   }).catch(() => {});
 }
 
+function normalizeButtonKey(element) {
+  const explicit = element.getAttribute("data-track-key");
+  if (explicit) {
+    return explicit;
+  }
+
+  const label = (
+    element.getAttribute("aria-label") ||
+    element.getAttribute("title") ||
+    element.textContent ||
+    ""
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "")
+    .replace(/-+/g, "-")
+    .slice(0, 64);
+
+  return label || "boton-sin-etiqueta";
+}
+
+function isInternalSectionLink(href) {
+  return typeof href === "string" && href.startsWith("#");
+}
+
+function closeNavMenu() {
+  navContainer?.classList.remove("is-open");
+  navToggle?.classList.remove("is-open");
+
+  if (navToggle) {
+    navToggle.setAttribute("aria-expanded", "false");
+  }
+}
+
+function trackCourseCta(control, href) {
+  const absoluteUrl = new URL(href, window.location.origin);
+  const courseKey = control.getAttribute("data-course-key") ||
+    absoluteUrl.searchParams.get("curso") ||
+    "general";
+
+  trackMetric("course_cta_click", {
+    courseKey,
+    source: window.location.pathname || "/"
+  });
+}
+
+function renderSearchResults(matches) {
+  if (!searchResults) {
+    return;
+  }
+
+  if (!matches.length) {
+    searchResults.innerHTML = `
+      <div class="search-item">
+        <strong>Sin coincidencias</strong>
+        <p>No encontramos cursos con ese texto.</p>
+      </div>
+    `;
+    searchResults.classList.remove("hidden");
+    return;
+  }
+
+  searchResults.innerHTML = matches.map((course) => `
+    <a
+      class="search-item"
+      href="${course.href}"
+      data-course-key="${course.key}"
+      data-track-key="buscar-${course.key}"
+    >
+      <strong>${course.title}</strong>
+      <p>${course.description}</p>
+      <span class="course-action">Adquirir ahora</span>
+    </a>
+  `).join("");
+
+  searchResults.classList.remove("hidden");
+}
+
 navItems.forEach((item) => {
   item.addEventListener("mouseenter", () => {
     navItems.forEach((link) => link.classList.remove("active"));
@@ -80,42 +158,13 @@ navContainer?.addEventListener("mouseleave", () => {
 });
 
 navToggle?.addEventListener("click", () => {
-  navContainer?.classList.toggle("is-open");
+  const isOpen = navContainer?.classList.toggle("is-open");
   navToggle.classList.toggle("is-open");
-});
+  navToggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
 
-loadingTriggers.forEach((trigger) => {
-  trigger.addEventListener("click", (event) => {
-    const href = trigger.getAttribute("href");
-
-    if (!href) {
-      return;
-    }
-
-    if (trigger.classList.contains("course-action")) {
-      const courseKey = new URL(href, window.location.origin).searchParams.get("curso") || "general";
-      trackMetric("course_cta_click", { courseKey, source: "homepage" });
-    }
-
-    showLoader();
-
-    if (href.startsWith("#")) {
-      event.preventDefault();
-
-      window.setTimeout(() => {
-        const target = document.querySelector(href);
-        target?.scrollIntoView({ behavior: "smooth", block: "start" });
-        hideLoader();
-        navContainer?.classList.remove("is-open");
-        navToggle?.classList.remove("is-open");
-      }, 500);
-
-      return;
-    }
-
-    window.setTimeout(() => {
-      hideLoader();
-    }, 700);
+  trackMetric("button_click", {
+    buttonKey: isOpen ? "menu-hamburguesa-abrir" : "menu-hamburguesa-cerrar",
+    source: window.location.pathname || "/"
   });
 });
 
@@ -124,7 +173,9 @@ searchInput?.addEventListener("input", () => {
 
   if (!query) {
     searchResults?.classList.add("hidden");
-    if (searchResults) searchResults.innerHTML = "";
+    if (searchResults) {
+      searchResults.innerHTML = "";
+    }
     return;
   }
 
@@ -133,37 +184,75 @@ searchInput?.addEventListener("input", () => {
     course.description.toLowerCase().includes(query)
   );
 
-  if (!matches.length) {
-    if (searchResults) {
-      searchResults.innerHTML = `<div class="search-item"><strong>Sin coincidencias</strong><p>No encontramos cursos con ese texto.</p></div>`;
-      searchResults.classList.remove("hidden");
-    }
-    return;
-  }
-
-  if (searchResults) {
-    searchResults.innerHTML = matches.map((course) => `
-      <a class="search-item" href="${course.href}" data-course-key="${course.key}">
-        <strong>${course.title}</strong>
-        <p>${course.description}</p>
-        <span class="course-action">Adquirir ahora</span>
-      </a>
-    `).join("");
-    searchResults.classList.remove("hidden");
-  }
+  renderSearchResults(matches);
 });
 
 document.addEventListener("click", (event) => {
-  const clickedInsideSearch = event.target instanceof Element &&
-    (event.target.closest(".search-shell") || event.target.closest(".search-results"));
+  const target = event.target instanceof Element ? event.target : null;
 
+  if (!target) {
+    return;
+  }
+
+  const clickedInsideSearch = target.closest(".search-shell") || target.closest(".search-results");
   if (!clickedInsideSearch) {
     searchResults?.classList.add("hidden");
+  }
+
+  if (target.closest(".rating-star")) {
+    return;
+  }
+
+  const control = target.closest("a[href], button");
+  if (!control || control === navToggle) {
+    return;
+  }
+
+  const href = control.tagName === "A" ? control.getAttribute("href") : "";
+  const buttonKey = normalizeButtonKey(control);
+
+  trackMetric("button_click", {
+    buttonKey,
+    source: window.location.pathname || "/",
+    href: href || undefined
+  });
+
+  if (control.tagName === "A" && href && href.includes("adquirir.html?curso=")) {
+    trackCourseCta(control, href);
+  }
+
+  if (control.tagName === "A" && href && isInternalSectionLink(href)) {
+    event.preventDefault();
+    showLoader();
+
+    window.setTimeout(() => {
+      const section = document.querySelector(href);
+      section?.scrollIntoView({ behavior: "auto", block: "start" });
+      closeNavMenu();
+      hideLoader();
+    }, 360);
+
+    return;
+  }
+
+  if (control.tagName === "A" && href) {
+    showLoader();
+    closeNavMenu();
+
+    window.setTimeout(() => {
+      hideLoader();
+    }, 700);
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 1480) {
+    closeNavMenu();
   }
 });
 
 window.addEventListener("load", () => {
   window.setTimeout(() => {
     hideLoader();
-  }, 1000);
+  }, 900);
 });

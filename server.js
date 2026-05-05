@@ -223,6 +223,7 @@ function summarizeMetrics() {
   const orders = readJsonFile(ORDERS_PATH, []);
 
   const perCourse = {};
+  const perButton = {};
 
   metrics.forEach((item) => {
     const key = item.courseKey || "general";
@@ -239,6 +240,11 @@ function summarizeMetrics() {
     if (item.eventType === "acquire_view") perCourse[key].started += 1;
     if (item.eventType === "payment_view") perCourse[key].paymentViews += 1;
     if (item.eventType === "purchase_complete") perCourse[key].completed += 1;
+
+    if (item.eventType === "button_click") {
+      const buttonKey = item.buttonKey || "sin-etiqueta";
+      perButton[buttonKey] = (perButton[buttonKey] || 0) + 1;
+    }
   });
 
   Object.values(perCourse).forEach((course) => {
@@ -251,10 +257,12 @@ function summarizeMetrics() {
       started: metrics.filter((item) => item.eventType === "acquire_view").length,
       paymentViews: metrics.filter((item) => item.eventType === "payment_view").length,
       completed: metrics.filter((item) => item.eventType === "purchase_complete").length,
+      buttonClicks: metrics.filter((item) => item.eventType === "button_click").length,
       testimonials: readJsonFile(TESTIMONIALS_PATH, []).length,
       receipts: orders.length
     },
-    perCourse
+    perCourse,
+    perButton
   };
 }
 
@@ -464,14 +472,14 @@ app.post("/api/calendar/book", async (req, res) => {
 });
 
 app.post("/api/metrics/track", (req, res) => {
-  const { eventType, courseKey, source, extra } = req.body;
+  const { eventType, courseKey, source, extra, buttonKey, href, page, label } = req.body;
 
   if (!eventType) {
     res.status(400).json({ error: "Falta el tipo de evento." });
     return;
   }
 
-  recordMetric(eventType, { courseKey, source, extra });
+  recordMetric(eventType, { courseKey, source, extra, buttonKey, href, page, label });
   res.json({ ok: true });
 });
 
