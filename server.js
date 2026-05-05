@@ -382,6 +382,16 @@ app.use(cors({
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+// Evita que el navegador se quede con archivos viejos en Render
+// (dashboard.js / auth.js / html). Esto facilita ver cambios al redeploy.
+app.use((req, res, next) => {
+  if (/\.(html|js|css)$/.test(req.path)) {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+  }
+  next();
+});
+
 app.use("/uploads", express.static(UPLOADS_DIR));
 app.use(express.static(__dirname));
 
