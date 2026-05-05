@@ -80,19 +80,35 @@ function formatGoogleDate(dateString, timeString, extraHours = 1) {
   return `${toStamp(start)}/${toStamp(end)}`;
 }
 
-fetch("/api/metrics/track", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    eventType: "acquire_view",
-    courseKey: selectedCourse,
-    source: "adquirir"
-  })
-}).catch(() => {});
+function sendMetricEvent(data) {
+  const payload = JSON.stringify(data);
 
-if (typeof window.trackAnalyticsEvent === "function") {
-  window.trackAnalyticsEvent("acquire_view", { courseKey: selectedCourse, source: "adquirir" });
+  if (navigator.sendBeacon) {
+    try {
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon("/api/metrics/track", blob);
+      return;
+    } catch (_error) {
+      // Fallback a fetch.
+    }
+  }
+
+  fetch("/api/metrics/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    keepalive: true,
+    body: payload
+  }).catch(() => {});
 }
+
+function trackMetric(eventType, payload = {}) {
+  sendMetricEvent({ eventType, ...payload });
+  if (typeof window.trackAnalyticsEvent === "function") {
+    window.trackAnalyticsEvent(eventType, payload);
+  }
+}
+
+trackMetric("acquire_view", { courseKey: selectedCourse, source: "adquirir" });
 
 if (classDate) {
   classDate.min = new Date().toISOString().split("T")[0];

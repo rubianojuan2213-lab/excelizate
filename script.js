@@ -56,14 +56,32 @@ function hideLoader() {
   document.body.classList.remove("is-loading");
 }
 
-function trackMetric(eventType, payload = {}) {
+function sendMetricEvent(data) {
+  const payload = JSON.stringify(data);
+
+  if (navigator.sendBeacon) {
+    try {
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon("/api/metrics/track", blob);
+      return;
+    } catch (_error) {
+      // Fall back to fetch si sendBeacon falla.
+    }
+  }
+
   fetch("/api/metrics/track", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ eventType, ...payload })
+    keepalive: true,
+    body: payload
   }).catch(() => {});
+}
+
+function trackMetric(eventType, payload = {}) {
+  const data = { eventType, ...payload };
+  sendMetricEvent(data);
 
   if (typeof window.trackAnalyticsEvent === "function") {
     window.trackAnalyticsEvent(eventType, payload);

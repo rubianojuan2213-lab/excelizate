@@ -15,19 +15,35 @@ if (!order.courseTitle) {
   window.location.href = "index.html#cursos";
 }
 
-fetch("/api/metrics/track", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    eventType: "payment_view",
-    courseKey: order.courseKey || "general",
-    source: "pago"
-  })
-}).catch(() => {});
+function sendMetricEvent(data) {
+  const payload = JSON.stringify(data);
 
-if (typeof window.trackAnalyticsEvent === "function") {
-  window.trackAnalyticsEvent("payment_view", { courseKey: order.courseKey || "general", source: "pago" });
+  if (navigator.sendBeacon) {
+    try {
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon("/api/metrics/track", blob);
+      return;
+    } catch (_error) {
+      // Fallback a fetch.
+    }
+  }
+
+  fetch("/api/metrics/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    keepalive: true,
+    body: payload
+  }).catch(() => {});
 }
+
+function trackMetric(eventType, payload = {}) {
+  sendMetricEvent({ eventType, ...payload });
+  if (typeof window.trackAnalyticsEvent === "function") {
+    window.trackAnalyticsEvent(eventType, payload);
+  }
+}
+
+trackMetric("payment_view", { courseKey: order.courseKey || "general", source: "pago" });
 
 paymentTitle.textContent = order.courseType === "Clase personalizada"
   ? "Tu reserva esta lista para pago"
