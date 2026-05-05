@@ -40,18 +40,19 @@ const {
   NOTIFY_EMAIL
 } = process.env;
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
-  console.error("Faltan variables de Google en .env");
-  process.exit(1);
+const GOOGLE_ENABLED = Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_REDIRECT_URI);
+
+if (!GOOGLE_ENABLED) {
+  console.warn(
+    "Google OAuth/Calendar deshabilitado: faltan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o GOOGLE_REDIRECT_URI."
+  );
 }
 
-const oauth2Client = new google.auth.OAuth2(
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URI
-);
+const oauth2Client = GOOGLE_ENABLED
+  ? new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI)
+  : null;
 
-const googleIdClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+const googleIdClient = GOOGLE_ENABLED ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 const adminEmails = ADMIN_EMAILS.split(",").map((item) => item.trim().toLowerCase()).filter(Boolean);
 const frontendUrl = FRONTEND_URL || APP_BASE_URL;
 const allowedOrigins = [frontendUrl, APP_BASE_URL, "http://localhost:3000", "http://127.0.0.1:5500", "http://localhost:5500"];
@@ -96,6 +97,9 @@ function saveTokens(tokens) {
 }
 
 function setStoredCredentials() {
+  if (!oauth2Client) {
+    return false;
+  }
   const stored = readTokens();
   if (stored) {
     oauth2Client.setCredentials(stored);
@@ -105,10 +109,12 @@ function setStoredCredentials() {
   return false;
 }
 
-oauth2Client.on("tokens", (tokens) => {
-  const current = readTokens() || {};
-  saveTokens({ ...current, ...tokens });
-});
+if (oauth2Client) {
+  oauth2Client.on("tokens", (tokens) => {
+    const current = readTokens() || {};
+    saveTokens({ ...current, ...tokens });
+  });
+}
 
 const blockedWords = [
   "odio",
@@ -323,13 +329,17 @@ app.get("/", (_req, res) => {
 
 app.get("/api/config", (_req, res) => {
   res.json({
-    googleClientId: GOOGLE_CLIENT_ID,
+    googleClientId: GOOGLE_ENABLED ? GOOGLE_CLIENT_ID : null,
     adminEmails,
     googleReviewUrl: GOOGLE_REVIEW_URL
   });
 });
 
 app.post("/api/auth/google-login", async (req, res) => {
+  if (!googleIdClient || !GOOGLE_ENABLED) {
+    res.status(503).json({ error: "Acceso con Google no esta configurado en el servidor." });
+    return;
+  }
   const { credential } = req.body;
 
   if (!credential) {
@@ -391,6 +401,10 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
 });
 
 app.get("/auth/google", (_req, res) => {
+  if (!oauth2Client || !GOOGLE_ENABLED) {
+    res.status(503).send("Google Calendar no esta configurado en el servidor.");
+    return;
+  }
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
@@ -401,6 +415,10 @@ app.get("/auth/google", (_req, res) => {
 });
 
 app.get("/auth/google/callback", async (req, res) => {
+  if (!oauth2Client || !GOOGLE_ENABLED) {
+    res.status(503).send("Google Calendar no esta configurado en el servidor.");
+    return;
+  }
   const code = req.query.code;
 
   if (!code || typeof code !== "string") {
@@ -424,6 +442,10 @@ app.get("/api/calendar/status", (_req, res) => {
 });
 
 app.post("/api/calendar/book", async (req, res) => {
+  if (!oauth2Client || !GOOGLE_ENABLED) {
+    res.status(503).json({ error: "Google Calendar no esta configurado en el servidor." });
+    return;
+  }
   if (!setStoredCredentials()) {
     res.status(401).json({
       error: "Google Calendar no esta conectado aun.",
@@ -654,6 +676,7 @@ app.get("/api/admin/dashboard", requireAuth, requireAdmin, (_req, res) => {
   res.json(summarizeMetrics());
 });
 
-app.listen(3000, () => {
-  console.log("Servidor listo en http://localhost:3000");
+const PORT = Number(process.env.PORT || 3000);
+app.listen(PORT, () => {
+  console.log(`Servidor listo en http://localhost:${PORT}`);
 });
