@@ -52,74 +52,73 @@
         <h1>Dashboard de metricas</h1>
         <p>Visualiza interacciones reales del sitio: embudo, clics por boton, paginas mas visitadas y tendencia por dia.</p>
         <p class="payment-note" id="dashboardStatus"></p>
-        <p class="payment-note" style="opacity:.7">Build: 2026-05-05-02</p>
+        <p class="payment-note" style="opacity:.7">Build: 2026-05-05-04 | Visual Dashboard</p>
       </section>
 
-      <div class="dashboard-grid" id="dashboardTotals"></div>
+      <!-- KPI Cards Section -->
+      <div class="kpi-cards-grid" id="dashboardTotals"></div>
 
-      <section class="dashboard-panels">
-        <article class="dashboard-panel dashboard-panel--featured">
-          <header class="dashboard-panel__header">
-            <h2>Curso más elegido</h2>
-            <p>El que genera más clics y actividad.</p>
-          </header>
-          <div id="dashboardTopCourse" class="dashboard-top-course"></div>
-        </article>
+      <!-- Charts Section -->
+      <div class="charts-grid">
+        <!-- Embudo General Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Embudo de conversión</h3>
+          <p class="chart-subtitle">Flujo completo del cliente</p>
+          <div class="chart-container">
+            <canvas id="funnelChart"></canvas>
+          </div>
+        </div>
 
-        <article class="dashboard-panel">
-          <header class="dashboard-panel__header">
-            <h2>Embudo general</h2>
-            <p>En que parte se devuelve la gente (conversion por etapa).</p>
-          </header>
-          <div id="dashboardFunnel" class="dashboard-funnel"></div>
-        </article>
+        <!-- Tendencia Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Tendencia (últimos 14 días)</h3>
+          <p class="chart-subtitle">Vistas de pago y compras</p>
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
 
-        <article class="dashboard-panel">
-          <header class="dashboard-panel__header">
-            <h2>Tendencia (ultimos dias)</h2>
-            <p>Vistas de pago y compras finalizadas por dia.</p>
-          </header>
-          <div id="dashboardTrend" class="dashboard-trend"></div>
-        </article>
-      </section>
+        <!-- Top Botones Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Top botones</h3>
+          <p class="chart-subtitle">Donde más hacen clic</p>
+          <div class="chart-container chart-container--small">
+            <canvas id="buttonsChart"></canvas>
+          </div>
+        </div>
 
-      <section class="dashboard-panels dashboard-panels--three">
-        <article class="dashboard-panel">
-          <header class="dashboard-panel__header">
-            <h2>Top botones</h2>
-            <p>Donde mas hacen clic.</p>
-          </header>
-          <div id="dashboardButtons" class="dashboard-bars"></div>
-        </article>
+        <!-- Top Cursos Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Cursos más populares</h3>
+          <p class="chart-subtitle">Clics por curso</p>
+          <div class="chart-container chart-container--small">
+            <canvas id="coursesChart"></canvas>
+          </div>
+        </div>
 
-        <article class="dashboard-panel">
-          <header class="dashboard-panel__header">
-            <h2>Deserciones (embudo)</h2>
-            <p>Donde se pierden mas clientes en el proceso.</p>
-          </header>
-          <div id="dashboardDropoffs" class="dashboard-bars"></div>
-        </article>
+        <!-- Deserciones Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Deserciones por etapa</h3>
+          <p class="chart-subtitle">Donde se pierden clientes</p>
+          <div class="chart-container chart-container--small">
+            <canvas id="dropoffsChart"></canvas>
+          </div>
+        </div>
 
-        <article class="dashboard-panel">
-          <header class="dashboard-panel__header">
-            <h2>Top paginas</h2>
-            <p>Origen/pagina mas frecuente en eventos.</p>
-          </header>
-          <div id="dashboardPages" class="dashboard-bars"></div>
-        </article>
-
-        <article class="dashboard-panel">
-          <header class="dashboard-panel__header">
-            <h2>Embudo por curso</h2>
-            <p>Conversion por curso (CTA → Pago → Finalizada).</p>
-          </header>
-          <div id="dashboardCourses" class="dashboard-course-grid"></div>
-        </article>
-      </section>
+        <!-- Conversion Rate Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Tasa de conversión</h3>
+          <p class="chart-subtitle">Por etapa del embudo</p>
+          <div class="chart-container chart-container--small">
+            <canvas id="conversionChart"></canvas>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="analytics.js"></script>
   <script src="auth.js?v=2026-05-05-04"></script>
   <script src="dashboard.js?v=2026-05-05-04"></script>

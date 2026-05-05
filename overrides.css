@@ -853,3 +853,212 @@
 .stat-value {
   display: block;
 }
+
+/* ==================== NEW VISUAL DASHBOARD ==================== */
+
+/* KPI Cards Grid */
+.kpi-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+/* KPI Card Styling */
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+  border: 2px solid;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.kpi-card__icon {
+  font-size: 2.5em;
+  min-width: 60px;
+  text-align: center;
+}
+
+.kpi-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.kpi-card__label {
+  margin: 0;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.75;
+}
+
+.kpi-card__value {
+  margin: 4px 0 0;
+  font-size: 1.8em;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.kpi-card__note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75em;
+  opacity: 0.6;
+  line-height: 1.4;
+}
+
+/* Color Variants */
+.kpi-card--blue {
+  border-color: rgba(37, 99, 235, 0.2);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02));
+}
+
+.kpi-card--blue .kpi-card__value {
+  color: #2563eb;
+}
+
+.kpi-card--green {
+  border-color: rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+}
+
+.kpi-card--green .kpi-card__value {
+  color: #10b981;
+}
+
+.kpi-card--orange {
+  border-color: rgba(245, 158, 11, 0.2);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.02));
+}
+
+.kpi-card--orange .kpi-card__value {
+  color: #f59e0b;
+}
+
+.kpi-card--purple {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.02));
+}
+
+.kpi-card--purple .kpi-card__value {
+  color: #8b5cf6;
+}
+
+.kpi-card--red {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02));
+}
+
+.kpi-card--red .kpi-card__value {
+  color: #ef4444;
+}
+
+.kpi-card--teal {
+  border-color: rgba(6, 182, 212, 0.2);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(6, 182, 212, 0.02));
+}
+
+.kpi-card--teal .kpi-card__value {
+  color: #06b6d4;
+}
+
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+/* Chart Cards */
+.chart-card {
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(15, 45, 95, 0.08);
+  box-shadow: 0 8px 24px rgba(15, 45, 95, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+.chart-card:hover {
+  box-shadow: 0 12px 32px rgba(15, 45, 95, 0.12);
+}
+
+.chart-title {
+  margin: 0 0 4px;
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--brand-blue);
+}
+
+.chart-subtitle {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.chart-container {
+  margin-top: 16px;
+  position: relative;
+  height: 300px;
+}
+
+.chart-container--small {
+  height: 250px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .kpi-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+
+  .charts-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .kpi-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .kpi-card__icon {
+    font-size: 2em;
+    min-width: 48px;
+  }
+
+  .kpi-card__value {
+    font-size: 1.4em;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .chart-container--small {
+    height: 220px;
+  }
+}

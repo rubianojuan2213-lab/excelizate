@@ -1,11 +1,4 @@
-const dashboardTotals = document.getElementById("dashboardTotals");
-const dashboardButtons = document.getElementById("dashboardButtons");
-const dashboardPages = document.getElementById("dashboardPages");
-const dashboardCourses = document.getElementById("dashboardCourses");
-const dashboardFunnel = document.getElementById("dashboardFunnel");
-const dashboardTrend = document.getElementById("dashboardTrend");
-const dashboardTopCourse = document.getElementById("dashboardTopCourse");
-const dashboardDropoffs = document.getElementById("dashboardDropoffs");
+const kpiGrid = document.getElementById("dashboardTotals");
 const authStatus = document.getElementById("authStatus");
 const dashboardStatus = document.getElementById("dashboardStatus");
 
@@ -15,176 +8,334 @@ if (dashboardStatus) {
   dashboardStatus.textContent = `Dashboard JS: ${DASHBOARD_JS_BUILD}`;
 }
 
+// Colores vibrantes para el dashboard
+const COLORS = {
+  primary: "#2563eb",
+  success: "#10b981",
+  warning: "#f59e0b",
+  danger: "#ef4444",
+  secondary: "#8b5cf6",
+  light: "#f3f4f6",
+  text: "#1f2937"
+};
+
+const CHART_COLORS = [
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#06b6d4",
+  "#ec4899",
+  "#6366f1"
+];
+
+let charts = {};
+
 function formatPct(value) {
   const safe = Number(value);
   if (!Number.isFinite(safe)) return "0%";
   return `${Math.round(safe * 100)}%`;
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function renderBars(container, entries, options = {}) {
+function renderKPICards(container, totals) {
   if (!container) return;
-  const limit = options.limit ?? 10;
-  const sliced = entries.slice(0, limit);
-  const max = sliced.reduce((acc, [, v]) => Math.max(acc, Number(v) || 0), 0) || 1;
+  
+  const conversion = totals.started ? totals.completed / totals.started : 0;
+  const paymentConversion = totals.paymentViews ? totals.completed / totals.paymentViews : 0;
+  const dropoffRate = totals.started ? (totals.started - totals.completed) / totals.started : 0;
 
-  if (!sliced.length) {
-    container.innerHTML = `<p class="payment-note">Sin datos aun.</p>`;
-    return;
-  }
-
-  container.innerHTML = sliced.map(([key, value]) => {
-    const pct = Math.round(((Number(value) || 0) / max) * 100);
-    return `
-      <div class="bar-row">
-        <div class="bar-row__meta">
-          <strong title="${escapeHtml(key)}">${escapeHtml(key)}</strong>
-          <span>${Number(value) || 0}</span>
-        </div>
-        <div class="bar-track" aria-hidden="true">
-          <div class="bar-fill" style="width:${pct}%"></div>
-        </div>
+  container.innerHTML = `
+    <div class="kpi-card kpi-card--blue">
+      <div class="kpi-card__icon">📊</div>
+      <div class="kpi-card__content">
+        <p class="kpi-card__label">Clics CTA</p>
+        <h3 class="kpi-card__value">${totals.ctaClicks}</h3>
+        <span class="kpi-card__note">Desde landing</span>
       </div>
-    `;
-  }).join("");
-}
+    </div>
 
-function renderFunnel(container, funnel) {
-  if (!container) return;
-  const steps = funnel?.steps || [];
-  if (!steps.length) {
-    container.innerHTML = `<p class="payment-note">Sin datos de embudo.</p>`;
-    return;
-  }
-
-  container.innerHTML = steps.map((step, index) => {
-    const prev = index === 0 ? step.value : steps[index - 1].value;
-    const drop = Math.max((prev || 0) - (step.value || 0), 0);
-    return `
-      <div class="funnel-step">
-        <div class="funnel-step__left">
-          <strong>${escapeHtml(step.label)}</strong>
-          <span>${step.value || 0}</span>
-        </div>
-        <div class="funnel-step__right">
-          <span class="pill">${index === 0 ? "Base" : `${formatPct(step.rateFromPrev)} vs etapa anterior`}</span>
-          ${index === 0 ? "" : `<span class="muted">Desisten: ${drop}</span>`}
-        </div>
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-card__icon">📝</div>
+      <div class="kpi-card__content">
+        <p class="kpi-card__label">Inicios de compra</p>
+        <h3 class="kpi-card__value">${totals.started}</h3>
+        <span class="kpi-card__note">Formulario rellenado</span>
       </div>
-    `;
-  }).join("");
+    </div>
+
+    <div class="kpi-card kpi-card--orange">
+      <div class="kpi-card__icon">💳</div>
+      <div class="kpi-card__content">
+        <p class="kpi-card__label">Vistas de pago</p>
+        <h3 class="kpi-card__value">${totals.paymentViews}</h3>
+        <span class="kpi-card__note">Llegaron a Nequi</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--purple">
+      <div class="kpi-card__icon">✅</div>
+      <div class="kpi-card__content">
+        <p class="kpi-card__label">Compras finalizadas</p>
+        <h3 class="kpi-card__value">${totals.completed}</h3>
+        <span class="kpi-card__note">Comprobante subido</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--red">
+      <div class="kpi-card__icon">📉</div>
+      <div class="kpi-card__content">
+        <p class="kpi-card__label">Tasa conversión</p>
+        <h3 class="kpi-card__value">${formatPct(conversion)}</h3>
+        <span class="kpi-card__note">Finalizadas/Formulario</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--teal">
+      <div class="kpi-card__icon">💰</div>
+      <div class="kpi-card__content">
+        <p class="kpi-card__label">Deserción</p>
+        <h3 class="kpi-card__value">${formatPct(dropoffRate)}</h3>
+        <span class="kpi-card__note">Que no completaron</span>
+      </div>
+    </div>
+  `;
 }
 
-function renderTrend(container, byDay) {
-  if (!container) return;
+function renderFunnelChart(data) {
+  const ctx = document.getElementById("funnelChart");
+  if (!ctx) return;
+
+  const steps = data.funnel?.steps || [];
+  const labels = steps.map(s => s.label);
+  const values = steps.map(s => s.value);
+
+  if (charts.funnel) charts.funnel.destroy();
+
+  charts.funnel = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Usuarios",
+        data: values,
+        backgroundColor: [
+          "rgba(59, 130, 246, 0.8)",
+          "rgba(16, 185, 129, 0.8)",
+          "rgba(245, 158, 11, 0.8)",
+          "rgba(239, 68, 68, 0.8)"
+        ],
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderTrendChart(byDay) {
+  const ctx = document.getElementById("trendChart");
+  if (!ctx) return;
+
   const data = Array.isArray(byDay) ? byDay.slice(-14) : [];
-  if (!data.length) {
-    container.innerHTML = `<p class="payment-note">Sin datos por dia aun.</p>`;
-    return;
-  }
+  const labels = data.map(d => d.date?.slice(5) || "");
+  const paymentViews = data.map(d => d.paymentViews || 0);
+  const completed = data.map(d => d.completed || 0);
 
-  const max = data.reduce((acc, item) => Math.max(acc, item.paymentViews || 0, item.completed || 0), 0) || 1;
-  container.innerHTML = `
-    <div class="trend-legend">
-      <span><i class="dot dot--a"></i> Vistas pago</span>
-      <span><i class="dot dot--b"></i> Finalizadas</span>
-    </div>
-    <div class="trend-grid">
-      ${data.map((item) => {
-        const payH = Math.round(((item.paymentViews || 0) / max) * 100);
-        const compH = Math.round(((item.completed || 0) / max) * 100);
-        const label = item.date?.slice(5) || "";
-        return `
-          <div class="trend-col" title="${escapeHtml(item.date)}">
-            <div class="trend-bars">
-              <div class="trend-bar trend-bar--a" style="height:${payH}%"></div>
-              <div class="trend-bar trend-bar--b" style="height:${compH}%"></div>
-            </div>
-            <div class="trend-label">${escapeHtml(label)}</div>
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
+  if (charts.trend) charts.trend.destroy();
+
+  charts.trend = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Vistas de pago",
+          data: paymentViews,
+          borderColor: "rgba(59, 130, 246, 1)",
+          backgroundColor: "rgba(59, 130, 246, 0.1)",
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2
+        },
+        {
+          label: "Compras finalizadas",
+          data: completed,
+          borderColor: "rgba(16, 185, 129, 1)",
+          backgroundColor: "rgba(16, 185, 129, 0.1)",
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "top" }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
 }
 
-function renderTopCourse(container, perCourse) {
-  if (!container) return;
-  const entries = Object.entries(perCourse || {}).sort((a, b) => (b[1].clicks || 0) - (a[1].clicks || 0));
-  
-  if (!entries.length) {
-    container.innerHTML = `<p class="payment-note">Sin datos de cursos aun.</p>`;
-    return;
-  }
+function renderButtonsChart(perButton) {
+  const ctx = document.getElementById("buttonsChart");
+  if (!ctx) return;
 
-  const [courseKey, courseData] = entries[0];
-  const conversionRate = courseData.started ? (courseData.completed / courseData.started * 100) : 0;
+  const entries = Object.entries(perButton || {})
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
   
-  container.innerHTML = `
-    <div class="top-course-card">
-      <div class="top-course-header">
-        <h3 style="font-size: 1.4em; margin: 0; text-transform: capitalize;">${escapeHtml(courseKey)}</h3>
-        <span class="pill" style="background: var(--accent, #007bff); color: white; padding: 0.5em 1em; border-radius: 20px; font-size: 0.9em;">TOP</span>
-      </div>
-      <div class="top-course-stats" style="margin-top: 1.5em; display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
-        <div class="stat-item">
-          <span class="stat-label">Clics</span>
-          <strong class="stat-value" style="font-size: 1.8em;">${courseData.clicks || 0}</strong>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Inicios de compra</span>
-          <strong class="stat-value" style="font-size: 1.8em;">${courseData.started || 0}</strong>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Finalizadas</span>
-          <strong class="stat-value" style="font-size: 1.8em; color: green;">${courseData.completed || 0}</strong>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Conversion</span>
-          <strong class="stat-value" style="font-size: 1.8em; color: green;">${Math.round(conversionRate)}%</strong>
-        </div>
-      </div>
-    </div>
-  `;
+  const labels = entries.map(e => e[0]);
+  const values = entries.map(e => e[1]);
+
+  if (charts.buttons) charts.buttons.destroy();
+
+  charts.buttons = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: CHART_COLORS,
+        borderColor: "#fff",
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "right" }
+      }
+    }
+  });
 }
 
-function renderDropoffs(container, funnel, perCourse) {
-  if (!container) return;
-  const steps = funnel?.steps || [];
+function renderCoursesChart(perCourse) {
+  const ctx = document.getElementById("coursesChart");
+  if (!ctx) return;
+
+  const entries = Object.entries(perCourse || {})
+    .map(([key, data]) => [key, data.clicks || 0])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
   
-  if (!steps.length) {
-    container.innerHTML = `<p class="payment-note">Sin datos de embudo.</p>`;
-    return;
-  }
+  const labels = entries.map(e => e[0]);
+  const values = entries.map(e => e[1]);
+
+  if (charts.courses) charts.courses.destroy();
+
+  charts.courses = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Clics",
+        data: values,
+        backgroundColor: "rgba(139, 92, 246, 0.8)",
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+}
+
+function renderDropoffsChart(funnel, perCourse) {
+  const ctx = document.getElementById("dropoffsChart");
+  if (!ctx) return;
 
   const dropoffData = [];
+  const steps = funnel?.steps || [];
+  
   steps.forEach((step, index) => {
     const prev = index === 0 ? step.value : steps[index - 1].value;
     const drop = Math.max((prev || 0) - (step.value || 0), 0);
     if (drop > 0) {
-      dropoffData.push([`${step.label} → ${steps[index + 1]?.label || 'salida'}`, drop]);
+      dropoffData.push([`${step.label} → Salida`, drop]);
     }
   });
 
-  // También agregamos deserciones por curso (started vs completed)
-  Object.entries(perCourse || {}).forEach(([courseKey, courseData]) => {
-    const courseDropOff = Math.max((courseData.started || 0) - (courseData.completed || 0), 0);
-    if (courseDropOff > 0) {
-      dropoffData.push([`${courseKey} (completa compra)`, courseDropOff]);
+  const sorted = dropoffData.sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const labels = sorted.map(d => d[0]);
+  const values = sorted.map(d => d[1]);
+
+  if (charts.dropoffs) charts.dropoffs.destroy();
+
+  charts.dropoffs = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Deserciones",
+        data: values,
+        backgroundColor: "rgba(239, 68, 68, 0.8)",
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } }
     }
   });
-
-  renderBars(container, dropoffData.sort((a, b) => b[1] - a[1]), { limit: 10 });
 }
 
+function renderConversionChart(funnel) {
+  const ctx = document.getElementById("conversionChart");
+  if (!ctx) return;
+
+  const steps = funnel?.steps || [];
+  const labels = steps.map(s => s.label);
+  const conversions = steps.map(s => Math.round((s.rateFromPrev || 0) * 100));
+
+  if (charts.conversion) charts.conversion.destroy();
+
+  charts.conversion = new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Tasa de conversión (%)",
+        data: conversions,
+        borderColor: "rgba(16, 185, 129, 1)",
+        backgroundColor: "rgba(16, 185, 129, 0.1)",
+        borderWidth: 2,
+        fill: true,
+        pointBackgroundColor: "rgba(16, 185, 129, 1)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "top" } },
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
+}
 
 async function loadDashboard() {
   try {
@@ -204,25 +355,6 @@ async function loadDashboard() {
       return;
     }
 
-    if (dashboardTotals) {
-      dashboardTotals.innerHTML = `
-        <article class="dashboard-card"><h3>Clics CTA</h3><strong>0</strong><span class="kpi-note">Desde landing</span></article>
-        <article class="dashboard-card"><h3>Formulario (adquirir)</h3><strong>0</strong><span class="kpi-note">Inicios de compra</span></article>
-        <article class="dashboard-card"><h3>Vista pago</h3><strong>0</strong><span class="kpi-note">Pasa a Nequi</span></article>
-        <article class="dashboard-card"><h3>Finalizadas</h3><strong>0</strong><span class="kpi-note">Comprobante subido</span></article>
-        <article class="dashboard-card dashboard-card--accent"><h3>Conversion</h3><strong>0%</strong><span class="kpi-note">Finalizadas / Formulario</span></article>
-        <article class="dashboard-card"><h3>Conv. desde pago</h3><strong>0%</strong><span class="kpi-note">Finalizadas / Vista pago</span></article>
-      `;
-    }
-
-    if (dashboardTopCourse) {
-      dashboardTopCourse.innerHTML = `<p class="payment-note">Cargando...</p>`;
-    }
-
-    if (dashboardDropoffs) {
-      dashboardDropoffs.innerHTML = `<p class="payment-note">Cargando...</p>`;
-    }
-
     const response = await fetch("/api/admin/dashboard", {
       headers: {
         ...headers
@@ -237,48 +369,18 @@ async function loadDashboard() {
       return;
     }
 
-    const conversion = data.totals.started ? data.totals.completed / data.totals.started : 0;
-    const paymentConversion = data.totals.paymentViews ? data.totals.completed / data.totals.paymentViews : 0;
+    // Render KPI Cards
+    renderKPICards(kpiGrid, data.totals);
 
-    dashboardTotals.innerHTML = `
-      <article class="dashboard-card"><h3>Clics CTA</h3><strong>${data.totals.ctaClicks}</strong><span class="kpi-note">Desde landing</span></article>
-      <article class="dashboard-card"><h3>Formulario (adquirir)</h3><strong>${data.totals.started}</strong><span class="kpi-note">Inicios de compra</span></article>
-      <article class="dashboard-card"><h3>Vista pago</h3><strong>${data.totals.paymentViews}</strong><span class="kpi-note">Pasa a Nequi</span></article>
-      <article class="dashboard-card"><h3>Finalizadas</h3><strong>${data.totals.completed}</strong><span class="kpi-note">Comprobante subido</span></article>
-      <article class="dashboard-card dashboard-card--accent"><h3>Conversion</h3><strong>${formatPct(conversion)}</strong><span class="kpi-note">Finalizadas / Formulario</span></article>
-      <article class="dashboard-card"><h3>Conv. desde pago</h3><strong>${formatPct(paymentConversion)}</strong><span class="kpi-note">Finalizadas / Vista pago</span></article>
-    `;
+    // Render Charts
+    renderFunnelChart(data);
+    renderTrendChart(data.byDay);
+    renderButtonsChart(data.perButton);
+    renderCoursesChart(data.perCourse);
+    renderDropoffsChart(data.funnel, data.perCourse);
+    renderConversionChart(data.funnel);
 
-    const buttonEntries = Object.entries(data.perButton || {}).sort((a, b) => b[1] - a[1]);
-    const pageEntries = Object.entries(data.perPage || {}).sort((a, b) => b[1] - a[1]);
-    const courseEntries = Object.entries(data.perCourse || {}).sort((a, b) => (b[1].completed || 0) - (a[1].completed || 0));
-
-    renderBars(dashboardButtons, buttonEntries, { limit: 12 });
-    renderBars(dashboardPages, pageEntries, { limit: 12 });
-    renderFunnel(dashboardFunnel, data.funnel);
-    renderTrend(dashboardTrend, data.byDay);
-    renderTopCourse(dashboardTopCourse, data.perCourse);
-    renderDropoffs(dashboardDropoffs, data.funnel, data.perCourse);
-    if (dashboardStatus) dashboardStatus.textContent = "Metricas actualizadas.";
-
-    if (!courseEntries.length) {
-      dashboardCourses.innerHTML = `<article class="dashboard-course-card"><h3>Sin datos aun</h3><p>No hay metricas registradas por curso.</p></article>`;
-      return;
-    }
-
-    dashboardCourses.innerHTML = courseEntries.map(([courseKey, course]) => `
-      <article class="dashboard-course-card">
-        <h3>${courseKey}</h3>
-        <div class="dashboard-list">
-          <div class="dashboard-row"><span>Clics</span><strong>${course.clicks}</strong></div>
-          <div class="dashboard-row"><span>Inicios</span><strong>${course.started}</strong></div>
-          <div class="dashboard-row"><span>Pagos vistos</span><strong>${course.paymentViews}</strong></div>
-          <div class="dashboard-row"><span>Finalizadas</span><strong>${course.completed}</strong></div>
-          <div class="dashboard-row"><span>Conv. formulario</span><strong>${formatPct(course.conversion || 0)}</strong></div>
-          <div class="dashboard-row"><span>Conv. desde pago</span><strong>${formatPct(course.paymentConversion || 0)}</strong></div>
-        </div>
-      </article>
-    `).join("");
+    if (dashboardStatus) dashboardStatus.textContent = "Metricas actualizadas ✓";
   } catch (_error) {
     authStatus.textContent = "No se pudo cargar el dashboard.";
     if (dashboardStatus) dashboardStatus.textContent = "No se pudo cargar el dashboard (API no responde).";
@@ -295,12 +397,9 @@ document.addEventListener("auth:changed", (event) => {
   loadDashboard();
 });
 
-// Evita la carrera: si auth.js ya cargo al usuario antes de que este
-// archivo registrara el listener, igual pintamos el dashboard.
 window.addEventListener("load", () => {
   const start = Date.now();
   const timer = window.setInterval(() => {
-    // Intentamos cargar aunque currentUser no este listo.
     if (typeof window.getAuthHeaders === "function") {
       const headers = window.getAuthHeaders();
       if (headers?.Authorization) {
