@@ -2,11 +2,12 @@ const kpiGrid = document.getElementById("dashboardTotals");
 const authStatus = document.getElementById("authStatus");
 const dashboardStatus = document.getElementById("dashboardStatus");
 
-const DASHBOARD_JS_BUILD = "2026-05-05-04";
+const DASHBOARD_JS_BUILD = "2026-05-05-05";
 
 if (dashboardStatus) {
   dashboardStatus.textContent = `Dashboard JS: ${DASHBOARD_JS_BUILD}`;
 }
+
 
 // Colores vibrantes para el dashboard
 const COLORS = {
@@ -103,6 +104,8 @@ function renderKPICards(container, totals) {
 }
 
 function renderFunnelChart(data) {
+  if (typeof Chart === 'undefined') return;
+  
   const ctx = document.getElementById("funnelChart");
   if (!ctx) return;
 
@@ -110,39 +113,47 @@ function renderFunnelChart(data) {
   const labels = steps.map(s => s.label);
   const values = steps.map(s => s.value);
 
-  if (charts.funnel) charts.funnel.destroy();
+  if (charts.funnel) {
+    try { charts.funnel.destroy(); } catch(e) {}
+  }
 
-  charts.funnel = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [{
-        label: "Usuarios",
-        data: values,
-        backgroundColor: [
-          "rgba(59, 130, 246, 0.8)",
-          "rgba(16, 185, 129, 0.8)",
-          "rgba(245, 158, 11, 0.8)",
-          "rgba(239, 68, 68, 0.8)"
-        ],
-        borderRadius: 8,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false }
+  try {
+    charts.funnel = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Usuarios",
+          data: values,
+          backgroundColor: [
+            "rgba(59, 130, 246, 0.8)",
+            "rgba(16, 185, 129, 0.8)",
+            "rgba(245, 158, 11, 0.8)",
+            "rgba(239, 68, 68, 0.8)"
+          ],
+          borderRadius: 8,
+          borderSkipped: false
+        }]
       },
-      scales: {
-        y: { beginAtZero: true }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
       }
-    }
-  });
+    });
+  } catch(e) {
+    console.error('Error renderizando chart embudo:', e);
+  }
 }
 
 function renderTrendChart(byDay) {
+  if (typeof Chart === 'undefined') return;
+  
   const ctx = document.getElementById("trendChart");
   if (!ctx) return;
 
@@ -151,46 +162,55 @@ function renderTrendChart(byDay) {
   const paymentViews = data.map(d => d.paymentViews || 0);
   const completed = data.map(d => d.completed || 0);
 
-  if (charts.trend) charts.trend.destroy();
+  if (charts.trend) {
+    try { charts.trend.destroy(); } catch(e) {}
+  }
 
-  charts.trend = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Vistas de pago",
-          data: paymentViews,
-          borderColor: "rgba(59, 130, 246, 1)",
-          backgroundColor: "rgba(59, 130, 246, 0.1)",
-          fill: true,
-          tension: 0.4,
-          borderWidth: 2
-        },
-        {
-          label: "Compras finalizadas",
-          data: completed,
-          borderColor: "rgba(16, 185, 129, 1)",
-          backgroundColor: "rgba(16, 185, 129, 0.1)",
-          fill: true,
-          tension: 0.4,
-          borderWidth: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: "top" }
+  try {
+    charts.trend = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Vistas de pago",
+            data: paymentViews,
+            borderColor: "rgba(59, 130, 246, 1)",
+            backgroundColor: "rgba(59, 130, 246, 0.1)",
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2
+          },
+          {
+            label: "Compras finalizadas",
+            data: completed,
+            borderColor: "rgba(16, 185, 129, 1)",
+            backgroundColor: "rgba(16, 185, 129, 0.1)",
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2
+          }
+        ]
       },
-      scales: {
-        y: { beginAtZero: true }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "top" }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
       }
-    }
-  });
+    });
+  } catch(e) {
+    console.error('Error renderizando chart tendencia:', e);
+  }
 }
 
 function renderButtonsChart(perButton) {
+  if (typeof Chart === 'undefined') return;
+  
   const ctx = document.getElementById("buttonsChart");
   if (!ctx) return;
 
@@ -201,29 +221,38 @@ function renderButtonsChart(perButton) {
   const labels = entries.map(e => e[0]);
   const values = entries.map(e => e[1]);
 
-  if (charts.buttons) charts.buttons.destroy();
+  if (charts.buttons) {
+    try { charts.buttons.destroy(); } catch(e) {}
+  }
 
-  charts.buttons = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: CHART_COLORS,
-        borderColor: "#fff",
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: "right" }
+  try {
+    charts.buttons = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: CHART_COLORS,
+          borderColor: "#fff",
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "right" }
+        }
       }
-    }
-  });
+    });
+  } catch(e) {
+    console.error('Error renderizando chart botones:', e);
+  }
 }
 
 function renderCoursesChart(perCourse) {
+  if (typeof Chart === 'undefined') return;
+  
   const ctx = document.getElementById("coursesChart");
   if (!ctx) return;
 
@@ -235,29 +264,38 @@ function renderCoursesChart(perCourse) {
   const labels = entries.map(e => e[0]);
   const values = entries.map(e => e[1]);
 
-  if (charts.courses) charts.courses.destroy();
+  if (charts.courses) {
+    try { charts.courses.destroy(); } catch(e) {}
+  }
 
-  charts.courses = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [{
-        label: "Clics",
-        data: values,
-        backgroundColor: "rgba(139, 92, 246, 0.8)",
-        borderRadius: 6
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true } }
-    }
-  });
+  try {
+    charts.courses = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Clics",
+          data: values,
+          backgroundColor: "rgba(139, 92, 246, 0.8)",
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } }
+      }
+    });
+  } catch(e) {
+    console.error('Error renderizando chart cursos:', e);
+  }
 }
 
 function renderDropoffsChart(funnel, perCourse) {
+  if (typeof Chart === 'undefined') return;
+  
   const ctx = document.getElementById("dropoffsChart");
   if (!ctx) return;
 
@@ -276,29 +314,38 @@ function renderDropoffsChart(funnel, perCourse) {
   const labels = sorted.map(d => d[0]);
   const values = sorted.map(d => d[1]);
 
-  if (charts.dropoffs) charts.dropoffs.destroy();
+  if (charts.dropoffs) {
+    try { charts.dropoffs.destroy(); } catch(e) {}
+  }
 
-  charts.dropoffs = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [{
-        label: "Deserciones",
-        data: values,
-        backgroundColor: "rgba(239, 68, 68, 0.8)",
-        borderRadius: 6
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true } }
-    }
-  });
+  try {
+    charts.dropoffs = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Deserciones",
+          data: values,
+          backgroundColor: "rgba(239, 68, 68, 0.8)",
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } }
+      }
+    });
+  } catch(e) {
+    console.error('Error renderizando chart deserciones:', e);
+  }
 }
 
 function renderConversionChart(funnel) {
+  if (typeof Chart === 'undefined') return;
+  
   const ctx = document.getElementById("conversionChart");
   if (!ctx) return;
 
@@ -306,35 +353,42 @@ function renderConversionChart(funnel) {
   const labels = steps.map(s => s.label);
   const conversions = steps.map(s => Math.round((s.rateFromPrev || 0) * 100));
 
-  if (charts.conversion) charts.conversion.destroy();
+  if (charts.conversion) {
+    try { charts.conversion.destroy(); } catch(e) {}
+  }
 
-  charts.conversion = new Chart(ctx, {
-    type: "radar",
-    data: {
-      labels,
-      datasets: [{
-        label: "Tasa de conversión (%)",
-        data: conversions,
-        borderColor: "rgba(16, 185, 129, 1)",
-        backgroundColor: "rgba(16, 185, 129, 0.1)",
-        borderWidth: 2,
-        fill: true,
-        pointBackgroundColor: "rgba(16, 185, 129, 1)",
-        pointBorderColor: "#fff",
-        pointBorderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "top" } },
-      scales: {
-        r: {
-          beginAtZero: true,
-          max: 100
+  try {
+    charts.conversion = new Chart(ctx, {
+      type: "radar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Tasa de conversión (%)",
+          data: conversions,
+          borderColor: "rgba(16, 185, 129, 1)",
+          backgroundColor: "rgba(16, 185, 129, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          pointBackgroundColor: "rgba(16, 185, 129, 1)",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "top" } },
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100
+          }
         }
       }
-    }
-  });
+    });
+  } catch(e) {
+    console.error('Error renderizando chart conversion:', e);
+  }
 }
 
 async function loadDashboard() {
@@ -355,6 +409,16 @@ async function loadDashboard() {
       return;
     }
 
+    // Esperar a que Chart.js esté disponible
+    let chartReady = false;
+    for (let i = 0; i < 50; i++) {
+      if (typeof Chart !== 'undefined') {
+        chartReady = true;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
     const response = await fetch("/api/admin/dashboard", {
       headers: {
         ...headers
@@ -372,16 +436,22 @@ async function loadDashboard() {
     // Render KPI Cards
     renderKPICards(kpiGrid, data.totals);
 
-    // Render Charts
-    renderFunnelChart(data);
-    renderTrendChart(data.byDay);
-    renderButtonsChart(data.perButton);
-    renderCoursesChart(data.perCourse);
-    renderDropoffsChart(data.funnel, data.perCourse);
-    renderConversionChart(data.funnel);
+    // Esperar un pequeño delay para que el DOM esté listo
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Render Charts - solo si Chart está disponible
+    if (chartReady || typeof Chart !== 'undefined') {
+      renderFunnelChart(data);
+      renderTrendChart(data.byDay);
+      renderButtonsChart(data.perButton);
+      renderCoursesChart(data.perCourse);
+      renderDropoffsChart(data.funnel, data.perCourse);
+      renderConversionChart(data.funnel);
+    }
 
     if (dashboardStatus) dashboardStatus.textContent = "Metricas actualizadas ✓";
   } catch (_error) {
+    console.error("Error cargando dashboard:", _error);
     authStatus.textContent = "No se pudo cargar el dashboard.";
     if (dashboardStatus) dashboardStatus.textContent = "No se pudo cargar el dashboard (API no responde).";
   }

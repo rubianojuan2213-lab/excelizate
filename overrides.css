@@ -1012,6 +1012,7 @@
   margin-top: 16px;
   position: relative;
   height: 300px;
+  width: 100%;
 }
 
 .chart-container--small {
