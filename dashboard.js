@@ -109,12 +109,22 @@ function renderTrend(container, byDay) {
 }
 
 async function loadDashboard() {
-  if (!window.currentUser) {
-    return;
-  }
-
   try {
     if (dashboardStatus) dashboardStatus.textContent = "Cargando metricas...";
+
+    if (typeof window.getAuthHeaders !== "function") {
+      if (dashboardStatus) dashboardStatus.textContent = "No se cargo auth.js (sin sesion).";
+      if (authStatus) authStatus.textContent = "No se cargo el modulo de autenticacion.";
+      return;
+    }
+
+    const headers = window.getAuthHeaders();
+    if (!headers?.Authorization) {
+      if (dashboardStatus) {
+        dashboardStatus.textContent = "No hay sesion activa. Inicia sesion con Google y recarga (Ctrl+F5).";
+      }
+      return;
+    }
 
     if (dashboardTotals) {
       dashboardTotals.innerHTML = `
@@ -129,7 +139,7 @@ async function loadDashboard() {
 
     const response = await fetch("/api/admin/dashboard", {
       headers: {
-        ...window.getAuthHeaders()
+        ...headers
       }
     });
 
@@ -202,17 +212,14 @@ document.addEventListener("auth:changed", (event) => {
 window.addEventListener("load", () => {
   const start = Date.now();
   const timer = window.setInterval(() => {
-    if (window.currentUser?.isAdmin) {
-      window.clearInterval(timer);
-      loadDashboard();
-      return;
-    }
-
-    if (window.currentUser && !window.currentUser.isAdmin) {
-      window.clearInterval(timer);
-      authStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
-      if (dashboardStatus) dashboardStatus.textContent = "Tu cuenta no tiene acceso como administrador.";
-      return;
+    // Intentamos cargar aunque currentUser no este listo.
+    if (typeof window.getAuthHeaders === "function") {
+      const headers = window.getAuthHeaders();
+      if (headers?.Authorization) {
+        window.clearInterval(timer);
+        loadDashboard();
+        return;
+      }
     }
 
     if (Date.now() - start > 5500) {
